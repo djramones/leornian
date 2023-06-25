@@ -16,7 +16,16 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("LEOR_SECRET_KEY")
 DEBUG = env.bool("LEOR_DEBUG")
 ALLOWED_HOSTS = env.list("LEOR_ALLOWED_HOSTS")
-DATABASES = {"default": env.db("LEOR_DB")}
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": env("LEOR_DB_HOST"),
+        "PORT": env("LEOR_DB_PORT"),
+        "NAME": env("LEOR_DB_NAME"),
+        "USER": env("LEOR_DB_USER"),
+        "PASSWORD": env("LEOR_DB_PASSWORD"),
+    }
+}
 
 
 # Application definition
