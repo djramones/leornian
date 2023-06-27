@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Leornian{% endblock %}</title>
+        <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'bootstrap/bootstrap-icons.min.css' %}">
+    </head>
+    <body>
+        <main class="col-lg-8 mx-auto p-4 pt-lg-5">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}{{ message.tags }}{% else %}alert-secondary{% endif %}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% block content_pre %}{% endblock %}
+            {% block content %}{% endblock %}
+            {% block content_post %}{% endblock %}
+        </main>
+        <footer class="col-lg-8 mx-auto p-4">
+            <hr>
+            <small class="text-secondary">
+                <strong>The Leornian Project</strong>
+                &bull;
+                <a class="link-secondary" href="https://github.com/djramones/leornian">Source on GitHub</a>
+            </small>
+        </footer>
+        <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
+    </body>
+</html>
