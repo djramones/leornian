@@ -20,6 +20,7 @@ After setting up a Postgres database, execute the following for the DB user:
     ALTER ROLE <myprojectuser> SET default_transaction_isolation TO 'read committed';
     ALTER ROLE <myprojectuser> SET timezone TO 'UTC';
     GRANT ALL PRIVILEGES ON DATABASE <myproject> TO <myprojectuser>;
+    ALTER ROLE <myprojectuser> CREATEDB; -- to allow creation of test DB
 
 Create a `.env` file from `.env.dist`.
 
