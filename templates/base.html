@@ -14,7 +14,9 @@
             <ul class="nav nav-underline">
                 {% with url_name=request.resolver_match.url_name %}
                 <li class="nav-item">
-                    <a class="nav-link {% if url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Leornian</a>
+                    <a class="nav-link link-body-emphasis {% if url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                        <strong>Leornian</strong>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">About</a>
