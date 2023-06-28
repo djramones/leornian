@@ -9,3 +9,4 @@ crispy-bootstrap5==0.7
 coverage==7.2.7
 pylint==2.17.4
 pylint-django==2.5.3
+django-debug-toolbar==4.1.0
