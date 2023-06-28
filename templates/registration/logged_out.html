@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Logged Out | Leornian{% endblock %}
+
+{% block content %}
+
+<p>You are logged out.</p>
+<ul>
+    <li><a href="{% url 'login' %}">Log in</a></li>
+    <li><a href="{% url 'home' %}">Go to the home page</a></li>
+</ul>
+
+{% endblock %}
