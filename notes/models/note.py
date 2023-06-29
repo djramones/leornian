@@ -1,5 +1,9 @@
 from django.db import models
 from django.conf import settings
+from django.utils import safestring
+from django.urls import reverse
+
+from markdown_it import MarkdownIt
 
 from notes.utils import generate_reference_code
 
@@ -18,9 +22,17 @@ class Note(models.Model):
     )
     is_curated = models.BooleanField(default=False)
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL
+        settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL
     )
     created = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def html(self):
+        """Render safe HTML from the Markdown-formatted `text` field."""
+        return safestring.mark_safe(MarkdownIt("js-default").render(self.text))
+
     def __str__(self):
         return str(self.code)
+
+    def get_absolute_url(self):
+        return reverse("notes:single-note", kwargs={"slug": self.code})
