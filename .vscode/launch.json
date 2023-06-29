@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Django",
+            "name": "Run Server",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
@@ -11,6 +11,17 @@
             ],
             "django": true,
             "justMyCode": true
+        },
+        {
+            "name": "Test Single Folder",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "test",
+                "${relativeFileDirname}"
+            ],
+            "django": true
         }
     ]
 }
