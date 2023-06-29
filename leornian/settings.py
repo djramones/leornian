@@ -31,6 +31,7 @@ DATABASES = {
 # Application definition
 
 INSTALLED_APPS = [
+    "notes.apps.NotesConfig",
     "crispy_forms",
     "crispy_bootstrap5",
     "django.contrib.admin",
