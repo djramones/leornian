@@ -14,4 +14,6 @@ def messages_test(request):
     ]
     for tag, msg in test_messages:
         messages.add_message(request, tag, msg)
+    if "next" in request.GET:
+        return HttpResponseRedirect(request.GET["next"])
     return HttpResponseRedirect("/")
