@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Note | Leornian{% endblock %}
+{% block title %}Note {% if object.author %}by {{ object.author.username }}{% endif %} on Leornian{% endblock %}
+
+{% block navigation %}
+    {% if user.is_authenticated %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="col-lg-9 mx-auto">
@@ -21,5 +27,11 @@
         </footer>
     </article>
 </div>
+
+{% if not user.is_authenticated %}
+<section class="text-center mt-5">
+    <strong>Leornian</strong> is a notes sharing and learning tool. <a href="{% url 'home' %}">Learn more</a> (or <a href="{% url 'login' %}">log in</a>).
+</section>
+{% endif %}
 
 {% endblock %}
