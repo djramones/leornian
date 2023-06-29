@@ -4,8 +4,21 @@
 
 {% block content %}
 <h1>My Account</h1>
-<hr class="my-5">
-<a class="btn btn-primary" href="{% url 'logout' %}">
-    <i class="bi-box-arrow-left"></i> Log Out
-</a>
+<hr class="col-lg-4 my-5">
+<ul class="list-group col-lg-6 mx-auto my-3">
+    <li class="list-group-item">
+        <i class="bi-at"></i> <strong>Username</strong>: {{ user.username }}
+    </li>
+    <li class="list-group-item">
+        <i class="bi-envelope"></i> <strong>Email</strong>: {{ user.email }}
+    </li>
+    <li class="list-group-item">
+        <i class="bi-clock"></i> <strong>Account Created</strong>: {{ user.date_joined|date:"d M Y (e)" }}
+    </li>
+</ul>
+<div class="col-lg-6 mx-auto">
+    <a class="btn btn-primary" href="{% url 'logout' %}">
+        <i class="bi-box-arrow-left"></i> Log Out
+    </a>
+</div>
 {% endblock %}
