@@ -22,7 +22,14 @@ class Note(models.Model):
     )
     is_curated = models.BooleanField(default=False)
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="authored_notes",
+    )
+    collectors = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, through="Collection", related_name="collected_notes"
     )
     created = models.DateTimeField(auto_now_add=True)
 
