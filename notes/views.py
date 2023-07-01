@@ -33,6 +33,8 @@ create_note = login_required(_NoteCreate(NoteForm))
 
 
 class NotesByAuthor(ListView):
+    paginate_by = 10
+
     def get_queryset(self):
         if "username" in self.kwargs:
             author = get_object_or_404(UserModel, username=self.kwargs["username"])

@@ -1,0 +1,25 @@
+<nav class="my-3">
+    <ul class="list-group list-group-horizontal justify-content-center">
+
+        {% if page_obj.has_previous %}
+        <li class="list-group-item">
+            <a class="icon-link" href="?page={{ page_obj.previous_page_number }}">
+                <i class="bi-arrow-left-circle"></i> Previous
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="list-group-item">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="list-group-item">
+            <a class="icon-link" href="?page={{ page_obj.next_page_number }}">
+                Next <i class="bi-arrow-right-circle"></i>
+            </a>
+        </li>
+        {% endif %}
+
+    </ul>
+</nav>
