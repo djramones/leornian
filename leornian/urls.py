@@ -20,7 +20,7 @@ urlpatterns = [
         login_required(TemplateView.as_view(template_name="my-account.html")),
         name="my-account",
     ),
-    path("notes/", include("notes.urls")),
+    path("", include("notes.urls")),
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
 ]
 
