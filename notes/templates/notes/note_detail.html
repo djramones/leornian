@@ -10,22 +10,7 @@
 
 {% block content %}
 <div class="col-lg-9 mx-auto">
-    <article class="card">
-        <div class="card-body">
-            <div class="my-3">{{ object.html }}</div>
-        </div>
-        <footer class="card-footer">
-            <small class="d-flex flex-wrap gap-3 my-3">
-                {% if object.author %}
-                <span><i class="bi-person"></i> {{ object.author.username }}</span>
-                {% endif %}
-                <span><i class="bi-clock"></i> {{ object.created|date:"r" }}</span>
-                <a class="link-secondary icon-link" href="{{ object.get_absolute_url }}">
-                    <i class="bi-link-45deg"></i> Permalink
-                </a>
-            </small>
-        </footer>
-    </article>
+    {% include 'notes/includes/note_card.html' %}
 </div>
 
 {% if not user.is_authenticated %}

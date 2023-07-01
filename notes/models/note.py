@@ -40,6 +40,9 @@ class Note(models.Model):
         """Render safe HTML from the Markdown-formatted `text` field."""
         return safestring.mark_safe(MarkdownIt("js-default").render(self.text))
 
+    class Meta:
+        ordering = ["-created"]
+
     def __str__(self):
         return str(self.code)
 

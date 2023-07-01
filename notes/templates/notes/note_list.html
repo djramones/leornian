@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Notes by {{ author.username }} on Leornian{% endblock %}
+
+{% block content %}
+<h1><i class="bi-journal-text"></i> Notes by {{ author.username }}</h1>
+<div class="row">
+    {% for object in object_list %}
+        <div class="col-lg-6 my-3">
+            {% include 'notes/includes/note_card.html' %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
