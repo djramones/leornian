@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load note_extras %}
+
+{% block title %}Preview Note | Leornian{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-6 px-lg-3">
+        <h2><i class="bi-card-heading"></i> Preview</h2>
+        <div class="card my-3">
+            <div class="card-body">{{ form.instance.html }}</div>
+            <div class="card-footer">
+                <small class="text-secondary">
+                    <i class="bi-clock"></i> {% now "r" %}
+                </small>
+            </div>
+        </div>
+        <div class="my-3">
+            <strong>Visibility</strong>: {% note_vis_badge form.instance %}
+        </div>
+
+        <form action="" method="post">
+            {% csrf_token %}
+            {% for field in form %}{{ field.as_hidden }}{% endfor %}
+            <input type="hidden" name="{{ stage_field }}" value="2" />
+            <input type="hidden" name="{{ hash_field }}" value="{{ hash_value }}" />
+            <button class="btn btn-primary" type="submit">
+                <i class="bi-check-circle"></i> Submit
+            </button>
+        </form>
+    </div>
+    <div class="col-lg-6 px-lg-3 mt-5 mt-lg-0">
+        <h2><i class="bi-pencil-square"></i> Revise</h2>
+        <div class="my-3">
+            {% include 'notes/includes/note_guide.html' %}
+        </div>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input type="hidden" name="{{ stage_field }}" value="1" />
+            <button class="btn btn-primary" type="submit">
+                <i class="bi-card-heading"></i> Preview Again
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

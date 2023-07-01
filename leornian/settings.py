@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "notes.apps.NotesConfig",
     "crispy_forms",
     "crispy_bootstrap5",
+    "formtools",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

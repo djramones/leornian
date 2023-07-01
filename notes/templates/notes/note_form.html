@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}New Note | Leornian{% endblock %}
+
+{% block content %}
+
+<div class="card col-lg-9 mx-auto">
+    <div class="card-body">
+        <h2 class="my-4"><i class="bi-file-earmark-plus"></i> New Note</h2>
+        <div class="my-3">
+            {% include 'notes/includes/note_guide.html' %}
+        </div>
+        <form method="post" action="">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input type="hidden" name="{{ stage_field }}" value="1" />
+            <button class="btn btn-primary" type="submit">
+                <i class="bi-card-heading"></i> Preview
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

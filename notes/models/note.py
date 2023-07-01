@@ -13,6 +13,8 @@ class Note(models.Model):
         NORMAL = 1
         UNLISTED = 2
 
+    VISIBILITY_TAGS = {Visibility.NORMAL: "success", Visibility.UNLISTED: "secondary"}
+
     code = models.CharField(
         max_length=9, editable=False, unique=True, default=generate_reference_code
     )
