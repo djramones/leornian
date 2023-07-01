@@ -3,7 +3,7 @@
         <div class="my-3">{{ object.html }}</div>
     </div>
     <footer class="card-footer">
-        <small class="d-flex flex-wrap gap-3 my-3">
+        <small class="text-secondary d-flex flex-wrap gap-3 my-3">
             {% if object.author %}
                 <a class="link-secondary icon-link" href="{% url 'notes:notes-by-username' object.author.username %}">
                     <i class="bi-person"></i> {{ object.author.username }}
@@ -13,6 +13,9 @@
             <a class="link-secondary icon-link" href="{{ object.get_absolute_url }}">
                 <i class="bi-link-45deg"></i> Permalink
             </a>
+            {% if object.visibility == object.Visibility.UNLISTED %}
+                <span><i class="bi-eye-slash"></i> Unlisted</span>
+            {% endif %}
         </small>
     </footer>
 </article>
