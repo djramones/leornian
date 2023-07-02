@@ -1,3 +1,5 @@
+{% load note_extras %}
+
 <article class="card">
     <div class="card-body">
         <div class="my-3">{{ object.html }}</div>
@@ -13,8 +15,8 @@
             <a class="link-secondary icon-link" href="{{ object.get_absolute_url }}">
                 <i class="bi-link-45deg"></i> Permalink
             </a>
-            {% if object.visibility == object.Visibility.UNLISTED %}
-                <span><i class="bi-eye-slash"></i> Unlisted</span>
+            {% if object.visibility != object.Visibility.NORMAL %}
+                {% note_vis_badge object %}
             {% endif %}
         </small>
     </footer>

@@ -12,6 +12,6 @@ def note_vis_badge(note):
     background color.
     """
     return {
-        "class_tag": note.VISIBILITY_TAGS[note.visibility],
-        "vis_label": note.get_visibility_display(),
+        "tags": note.VISIBILITY_TAGS[note.visibility],
+        "label": note.get_visibility_display(),
     }

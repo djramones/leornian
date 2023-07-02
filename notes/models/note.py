@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from markdown_it import MarkdownIt
 
-from notes.utils import generate_reference_code
+from notes.utils import ChoiceTags, generate_reference_code
 
 
 class Note(models.Model):
@@ -13,7 +13,10 @@ class Note(models.Model):
         NORMAL = 1
         UNLISTED = 2
 
-    VISIBILITY_TAGS = {Visibility.NORMAL: "success", Visibility.UNLISTED: "secondary"}
+    VISIBILITY_TAGS = {
+        Visibility.NORMAL: ChoiceTags("success", "eye"),
+        Visibility.UNLISTED: ChoiceTags("secondary", "eye-slash"),
+    }
 
     code = models.CharField(
         max_length=9, editable=False, unique=True, default=generate_reference_code
