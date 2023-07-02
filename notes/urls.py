@@ -1,10 +1,26 @@
 from django.urls import path
 
-from .views import create_note, NotesByAuthor, SingleNote
+from . import views
 
 app_name = "notes"
 urlpatterns = [
-    path("new/", create_note, name="create-note"),
-    path("@<username>/", NotesByAuthor.as_view(), name="notes-by-username"),
-    path("<slug:slug>/", SingleNote.as_view(), name="single-note"),
+    path("new/", views.create_note, name="create-note"),
+    path("collection/", views.MyCollection.as_view(), name="my-collection"),
+    path(
+        "collection/by-me/",
+        views.MyCollectionByMe.as_view(),
+        name="my-collection-by-me",
+    ),
+    path(
+        "not-in-collection/by-me/",
+        views.NotInCollectionByMe.as_view(),
+        name="not-in-collection-by-me",
+    ),
+    path(
+        "collection/by-others/",
+        views.MyCollectionByOthers.as_view(),
+        name="my-collection-by-others",
+    ),
+    path("@<username>/", views.NotesByAuthor.as_view(), name="notes-by-username"),
+    path("<slug:slug>/", views.SingleNote.as_view(), name="single-note"),
 ]

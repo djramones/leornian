@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ImproperlyConfigured
 
@@ -50,6 +51,35 @@ class NotesByAuthor(ListView):
             UserModel, username=self.kwargs["username"]
         )
         return context
+
+
+class MyCollection(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "notes/my-collection.html"
+
+    def get_queryset(self):
+        return self.request.user.collected_notes.select_related("author")
+
+
+class MyCollectionByMe(MyCollection):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(author=self.request.user)
+
+
+class NotInCollectionByMe(MyCollection):
+    def get_queryset(self):
+        return (
+            Note.objects.filter(author=self.request.user)
+            .exclude(collectors=self.request.user)
+            .select_related("author")
+        )
+
+
+class MyCollectionByOthers(MyCollection):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.exclude(author=self.request.user)
 
 
 class SingleNote(DetailView):

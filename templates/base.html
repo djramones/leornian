@@ -32,6 +32,12 @@
                         <span class="d-none d-lg-block">New Note</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link icon-link {% if namespace == 'notes' and url_name == 'my-collection' %}active{% endif %}" href="{% url 'notes:my-collection' %}">
+                        <i class="bi-collection"></i>
+                        <span class="d-none d-lg-block">Collection</span>
+                    </a>
+                </li>
                 {% endif %}
                 <li class="nav-item">
                     {% if not user.is_authenticated %}
