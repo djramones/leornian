@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from . import views
 
@@ -22,5 +22,10 @@ urlpatterns = [
         name="my-collection-by-others",
     ),
     path("@<username>/", views.NotesByAuthor.as_view(), name="notes-by-username"),
+    re_path(
+        r"^(?P<code>[\w-]+)/(?P<action>save|unsave)/$",
+        views.CollectionAction.as_view(),
+        name="collection-action",
+    ),
     path("<slug:slug>/", views.SingleNote.as_view(), name="single-note"),
 ]

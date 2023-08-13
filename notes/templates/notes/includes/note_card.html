@@ -1,8 +1,10 @@
+{% load note_controls %}
 {% load note_extras %}
 
 <article class="card">
     <div class="card-body">
         <div class="my-3">{{ object.html }}</div>
+        {% note_controls object request %}
     </div>
     <footer class="card-footer">
         <small class="text-secondary d-flex flex-wrap gap-3 my-3">
