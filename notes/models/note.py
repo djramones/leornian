@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Exists, OuterRef
 from django.conf import settings
 from django.utils import safestring
 from django.urls import reverse
@@ -6,6 +7,15 @@ from django.urls import reverse
 from markdown_it import MarkdownIt
 
 from notes.utils import ChoiceTags, generate_reference_code
+
+
+class NoteQuerySet(models.QuerySet):
+    def annotate_for_controls(self, user):
+        if not hasattr(user, "collected_notes"):
+            return self
+        return self.annotate(
+            saved=Exists(user.collected_notes.filter(pk=OuterRef("pk")))
+        )
 
 
 class Note(models.Model):
@@ -42,6 +52,8 @@ class Note(models.Model):
     def html(self):
         """Render safe HTML from the Markdown-formatted `text` field."""
         return safestring.mark_safe(MarkdownIt("js-default").render(self.text))
+
+    objects = NoteQuerySet.as_manager()
 
     class Meta:
         ordering = ["-created"]

@@ -63,9 +63,11 @@ class NotesByAuthor(GracefulListView):
     def get_queryset(self):
         if "username" in self.kwargs:
             author = get_object_or_404(UserModel, username=self.kwargs["username"])
-            return Note.objects.filter(
-                author=author, visibility=Note.Visibility.NORMAL
-            ).select_related("author")
+            return (
+                Note.objects.filter(author=author, visibility=Note.Visibility.NORMAL)
+                .select_related("author")
+                .annotate_for_controls(self.request.user)
+            )
 
         raise ImproperlyConfigured("'username' keyword argument not supplied.")
 
@@ -82,7 +84,9 @@ class MyCollection(LoginRequiredMixin, GracefulListView):
     template_name = "notes/my-collection.html"
 
     def get_queryset(self):
-        return self.request.user.collected_notes.select_related("author")
+        return self.request.user.collected_notes.select_related(
+            "author"
+        ).annotate_for_controls(self.request.user)
 
 
 class MyCollectionByMe(MyCollection):
@@ -97,6 +101,7 @@ class NotInCollectionByMe(MyCollection):
             Note.objects.filter(author=self.request.user)
             .exclude(collectors=self.request.user)
             .select_related("author")
+            .annotate_for_controls(self.request.user)
         )
 
 
@@ -109,6 +114,9 @@ class MyCollectionByOthers(MyCollection):
 class SingleNote(DetailView):
     model = Note
     slug_field = "code"
+
+    def get_queryset(self):
+        return super().get_queryset().annotate_for_controls(self.request.user)
 
 
 class CollectionAction(LoginRequiredMixin, View):

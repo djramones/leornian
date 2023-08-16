@@ -9,7 +9,7 @@ def note_controls(note, request):
     controls = []
 
     if request.user.is_authenticated:
-        if note not in request.user.collected_notes.all():
+        if not note.saved:
             # Save note to collection
             controls.append(
                 {
