@@ -21,7 +21,7 @@ urlpatterns = [
         name="my-account",
     ),
     path("", include("notes.urls")),
-    path("", TemplateView.as_view(template_name="home.html"), name="home"),
+    path("", site_views.home, name="home"),
 ]
 
 if settings.DEBUG:

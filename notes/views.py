@@ -1,5 +1,5 @@
 from django.views import View
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpResponseRedirect
 from django.contrib import messages
@@ -154,3 +154,7 @@ class CollectionAction(LoginRequiredMixin, View):
         if url_has_allowed_host_and_scheme(redirect_url, allowed_hosts=None):
             return HttpResponseRedirect(redirect_url)
         return HttpResponseRedirect(note.get_absolute_url())
+
+
+class Start(TemplateView):
+    template_name = "notes/start.html"

@@ -14,10 +14,15 @@
             <ul class="nav nav-underline">
                 {% with namespace=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
                 <li class="nav-item">
-                    <a class="nav-link link-body-emphasis {% if url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                    <a class="nav-link link-body-emphasis" href="{% url 'home' %}">
                         <strong>Leornian</strong>
                     </a>
                 </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link {% if url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Start</a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="#">About</a>
                 </li>
@@ -46,7 +51,8 @@
                     </a>
                     {% else %}
                     <a class="nav-link icon-link {% if url_name == 'my-account' %}active{% endif %}" href="{% url 'my-account' %}">
-                        <i class="bi-person-circle"></i> Account
+                        <i class="bi-person-circle"></i>
+                        <span class="d-none d-lg-block">Account</span>
                     </a>
                     {% endif %}
                 </li>
@@ -73,7 +79,7 @@
         <footer class="col-lg-8 mx-auto p-4">
             <hr>
             <small class="text-secondary">
-                <strong>The Leornian Project</strong>
+                <strong>Leornian</strong>
                 &bull;
                 <a class="icon-link link-secondary" href="https://github.com/djramones/leornian">
                     Platform source on GitHub

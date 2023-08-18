@@ -1,9 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<p class="col-lg-8 fs-5">Leornian is a notes sharing and learning tool.</p>
-<hr class="col-lg-4 my-5">
-<a class="btn btn-primary btn-lg" href="#">
-    <i class="bi-box-arrow-in-right"></i> Get Started
-</a>
+<div class="row align-items-center row-gap-3">
+    <div class="col-lg-4">
+        <p class="fs-5">Leornian is a notes sharing and learning tool.</p>
+        <a class="btn btn-primary" href="{% url 'login' %}">
+            <i class="bi-box-arrow-in-right"></i> Get Started
+        </a>
+    </div>
+    <div class="col-lg-8">
+        <img class="img-fluid rounded" src="{% static 'images/pexels-pixabay-159711.jpg' %}" alt="Shelves full of colorful books.">
+    </div>
+</div>
 {% endblock %}
