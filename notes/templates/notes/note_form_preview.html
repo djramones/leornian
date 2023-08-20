@@ -8,7 +8,7 @@
 
 <div class="row">
     <div class="col-lg-6 px-lg-3">
-        <h2><i class="bi-card-heading"></i> Preview</h2>
+        <h1><i class="bi-card-heading"></i> Preview &amp; Submit</h1>
         <div class="card my-3">
             <div class="card-body">{{ form.instance.html }}</div>
             <div class="card-footer">
@@ -32,15 +32,19 @@
         </form>
     </div>
     <div class="col-lg-6 px-lg-3 mt-5 mt-lg-0">
-        <h2><i class="bi-pencil-square"></i> Revise</h2>
+        <h1><i class="bi-pencil-square"></i> Revise</h1>
         <div class="my-3">
             {% include 'notes/includes/note_guide.html' %}
         </div>
         <form action="" method="post">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <input type="hidden" name="{{ stage_field }}" value="1" />
-            <button class="btn btn-primary" type="submit">
+            <div class="card">
+                <div class="card-body">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <input type="hidden" name="{{ stage_field }}" value="1" />
+                </div>
+            </div>
+            <button class="btn btn-primary mt-3" type="submit">
                 <i class="bi-card-heading"></i> Preview Again
             </button>
         </form>

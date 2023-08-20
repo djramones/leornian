@@ -4,6 +4,13 @@
 
 {% block content %}
 <h1><i class="bi-journal-text"></i> Notes by {{ author.username }}</h1>
+{% if paginator.count > 0 %}
+    <div class="mt-3 mb-4">
+        <small class="text-secondary">
+            {{ paginator.count }} note{{ paginator.count|pluralize }}
+        </small>
+    </div>
+{% endif %}
 <div class="row">
     {% for object in object_list %}
         <div class="col-lg-6 my-3">

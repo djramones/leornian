@@ -3,7 +3,7 @@
 {% block title %}My Account | Leornian{% endblock %}
 
 {% block content %}
-<h1 class="mb-5"><i class="bi-person-circle"></i> My Account</h1>
+<h1 class="text-center mb-5"><i class="bi-person-circle"></i> My Account</h1>
 <ul class="list-group col-lg-6 mx-auto my-3">
     <li class="list-group-item">
         <i class="bi-at"></i> <strong>Username</strong>: {{ user.username }}
@@ -15,7 +15,7 @@
         <i class="bi-clock"></i> <strong>Account Created</strong>: {{ user.date_joined|date:"d M Y (e)" }}
     </li>
 </ul>
-<div class="col-lg-6 mx-auto">
+<div class="text-center mx-auto">
     <a class="btn btn-primary" href="{% url 'logout' %}">
         <i class="bi-box-arrow-left"></i> Log Out
     </a>
