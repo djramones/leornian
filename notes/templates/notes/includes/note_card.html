@@ -15,7 +15,12 @@
                     <i class="bi-person"></i> {{ object.author.username }}
                 </a>
             {% endif %}
-            <span><i class="bi-clock"></i> {{ object.created|date:"r" }}</span>
+            <span>
+                <i class="bi-clock"></i>
+                <time datetime="{{ object.created|date:'c' }}" title="{{ object.created|date:'r' }}">
+                    {{ object.created|date:"d M Y (e)" }}
+                </time>
+            </span>
             <a class="link-secondary icon-link" href="{{ object.get_absolute_url }}">
                 <i class="bi-link-45deg"></i> Permalink
             </a>

@@ -12,7 +12,10 @@
         <i class="bi-envelope"></i> <strong>Email</strong>: {{ user.email }}
     </li>
     <li class="list-group-item">
-        <i class="bi-clock"></i> <strong>Account Created</strong>: {{ user.date_joined|date:"d M Y (e)" }}
+        <i class="bi-clock"></i> <strong>Account Created</strong>:
+        <time datetime="{{ user.date_joined|date:'c' }}" title="{{ user.date_joined|date:'r' }}">
+            {{ user.date_joined|date:"d M Y (e)" }}
+        </time>
     </li>
 </ul>
 <div class="text-center mx-auto">
