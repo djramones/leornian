@@ -1,3 +1,5 @@
+"""Core note model and related querying logic."""
+
 from django.db import models
 from django.db.models import Exists, OuterRef
 from django.conf import settings
@@ -31,6 +33,12 @@ class NoteQuerySet(models.QuerySet):
 
 
 class Note(models.Model):
+    """Core note model."""
+
+    # ------------
+    # ENUMERATIONS
+    # ------------
+
     class Visibility(models.IntegerChoices):
         NORMAL = 1
         UNLISTED = 2
@@ -40,6 +48,10 @@ class Note(models.Model):
         Visibility.UNLISTED: ChoiceTags("secondary", "eye-slash"),
     }
 
+    # ------
+    # FIELDS
+    # ------
+
     code = models.CharField(
         max_length=9, editable=False, unique=True, default=generate_reference_code
     )
@@ -47,7 +59,6 @@ class Note(models.Model):
     visibility = models.PositiveSmallIntegerField(
         choices=Visibility.choices, default=Visibility.NORMAL
     )
-    is_curated = models.BooleanField(default=False)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         blank=True,
@@ -60,10 +71,18 @@ class Note(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True)
 
+    # --------------------
+    # METHODS & PROPERTIES
+    # --------------------
+
     @property
     def html(self):
         """Render safe HTML from the Markdown-formatted `text` field."""
         return safestring.mark_safe(MarkdownIt("js-default").render(self.text))
+
+    # ----------
+    # META, ETC.
+    # ----------
 
     objects = NoteQuerySet.as_manager()
 
