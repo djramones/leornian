@@ -22,6 +22,7 @@ urlpatterns = [
         name="my-collection-by-others",
     ),
     path("@<username>/", views.NotesByAuthor.as_view(), name="notes-by-username"),
+    path("discover/", views.Discover.as_view(), name="discover"),
     re_path(
         r"^(?P<code>[\w-]+)/(?P<action>save|unsave)/$",
         views.CollectionAction.as_view(),

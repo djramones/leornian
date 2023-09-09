@@ -9,8 +9,9 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
-from django.core.exceptions import ImproperlyConfigured
+from django.shortcuts import get_object_or_404, render
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.urls import reverse
 
 from formtools.preview import FormPreview
 
@@ -154,6 +155,31 @@ class CollectionAction(LoginRequiredMixin, View):
         if url_has_allowed_host_and_scheme(redirect_url, allowed_hosts=None):
             return HttpResponseRedirect(redirect_url)
         return HttpResponseRedirect(note.get_absolute_url())
+
+
+class Discover(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            note = Note.objects.get_random()
+        else:
+            note = Note.objects.get_random(for_user=request.user)
+        return render(request, "notes/discover.html", {"note": note})
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise PermissionDenied
+
+        note = get_object_or_404(Note, code=request.POST.get("code"))
+        request.user.collected_notes.add(note)
+
+        success_msg = (
+            "A note has been saved to your collection."
+            + f" <a href='{note.get_absolute_url()}'>View saved note</a>"
+        )
+        success_msg = mark_safe(success_msg)
+        messages.add_message(request, messages.SUCCESS, success_msg)
+
+        return HttpResponseRedirect(reverse("notes:discover"))
 
 
 class Start(TemplateView):

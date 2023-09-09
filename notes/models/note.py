@@ -17,6 +17,18 @@ class NoteQuerySet(models.QuerySet):
             saved=Exists(user.collected_notes.filter(pk=OuterRef("pk")))
         )
 
+    def get_random(self, for_user=None):
+        if for_user:
+            qs = self.exclude(collectors=for_user).exclude(author=for_user)
+        else:
+            qs = self
+
+        qs = qs.exclude(visibility=Note.Visibility.UNLISTED)
+
+        # `order_by("?")` can be slow at scale. See:
+        # tech.reversedelay.net/2023/09/optimizing-sql-random-row-select/
+        return qs.order_by("?").first()
+
 
 class Note(models.Model):
     class Visibility(models.IntegerChoices):

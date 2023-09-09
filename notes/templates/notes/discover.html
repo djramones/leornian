@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Discover Notes on Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4"><i class="bi-binoculars"></i> Discover Notes</h1>
+{% if note %}
+    <div class="col-lg-9 mx-auto">
+        {% include 'notes/includes/note_card.html' with object=note omit_controls=True %}
+    </div>
+    <div class="text-center mt-4">
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'notes:discover' %}" class="d-inline-block">
+            {% csrf_token %}
+            <input type="hidden" name="code" value="{{ note.code }}">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi-plus-circle"></i> Save and Next
+            </button>
+        </form>
+        {% endif %}
+        <a class="btn btn-primary" href="{% url 'notes:discover' %}">
+            <i class="bi-shuffle"></i> Next
+        </a>
+    </div>
+    {% if note.author %}
+        <div class="text-center mt-4">
+            View more notes by
+            <a class="icon-link" href="{% url 'notes:notes-by-username' note.author.username %}">
+                {{ note.author.username }}
+            </a>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="text-center">
+        <p>No note available. 🤔</p>
+        <p><a href="{% url 'notes:discover' %}">Try again</a></p>
+    </div>
+{% endif %}
+{% endblock %}
