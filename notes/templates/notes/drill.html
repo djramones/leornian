@@ -8,13 +8,19 @@
 {% if request.method == 'GET' %}
     <div class="text-center">
         {# TODO: Drill explainer. #}
-        {# TODO: disable 'Begin' button if not enough notes available. #}
-        <form method="post" action="{% url 'notes:drill' %}" class="d-inline-block">
-            {% csrf_token %}
-            <button class="btn btn-primary" type="submit">
-                <i class="bi-play"></i> Begin Drill
-            </button>
-        </form>
+        {% if disable_begin %}
+            <div class="alert alert-info text-center">
+                Drill requires your collection to have at least two notes.
+                <a href="{% url 'notes:discover' %}">Discover notes</a>
+            </div>
+        {% else %}
+            <form method="post" action="{% url 'notes:drill' %}" class="d-inline-block">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi-play"></i> Begin Drill
+                </button>
+            </form>
+        {% endif %}
     </div>
 {% elif request.method == 'POST' %}
     {% if error %}
@@ -68,7 +74,7 @@
     </div>
 {% endif %}
 
-{% if not error %}
+{% if not error and not disable_begin %}
     <div class="text-center text-secondary mt-4">
         <small>{{ recent_drill_count }} note{{ recent_drill_count|pluralize }} in your collection drilled (or added) in the last 24h</small>
     </div>

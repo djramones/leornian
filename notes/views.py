@@ -188,6 +188,8 @@ class Discover(View):
 
 class Drill(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
+        coll_count = Collection.objects.filter(user=request.user).count()
+        disable_begin = True if coll_count < 2 else False
         recent_drill_count = Collection.objects.filter(
             user=request.user,
             last_drilled__gt=timezone.now() - timezone.timedelta(hours=24),
@@ -195,7 +197,7 @@ class Drill(LoginRequiredMixin, View):
         return render(
             request,
             "notes/drill.html",
-            {"recent_drill_count": recent_drill_count},
+            {"disable_begin": disable_begin, "recent_drill_count": recent_drill_count},
         )
 
     def post(self, request, *args, **kwargs):
