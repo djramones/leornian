@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Drill Notes on Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4"><i class="bi-arrow-repeat"></i> Drill Notes</h1>
+
+{% if request.method == 'GET' %}
+    <div class="text-center">
+        {# TODO: Drill explainer. #}
+        {# TODO: disable 'Begin' button if not enough notes available. #}
+        <form method="post" action="{% url 'notes:drill' %}" class="d-inline-block">
+            {% csrf_token %}
+            <button class="btn btn-primary" type="submit">
+                <i class="bi-play"></i> Begin Drill
+            </button>
+        </form>
+    </div>
+{% elif request.method == 'POST' %}
+    {% if error %}
+        <div class="alert alert-danger text-center">
+            Sorry, an error was encountered.
+            {% if error == 'insufficient-collection' %}
+                There are not enough notes in your collection.
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="col-lg-9 mx-auto">
+            {% include 'notes/includes/note_card.html' with object=note omit_controls=True %}
+        </div>
+        <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
+            <form method="post" action="{% url 'notes:drill' %}" class="d-inline-block">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi-star-fill"></i> Promote and Next
+                </button>
+            </form>
+            <form method="post" action="{% url 'notes:drill' %}" class="d-inline-block">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi-star"></i> Demote and Next
+                </button>
+            </form>
+            <form method="post" action="{% url 'notes:drill' %}" class="d-inline-block">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi-play"></i> Next
+                </button>
+            </form>
+        </div>
+        {# TODO: display count of recently-drilled notes. #}
+    {% endif %}
+{% else %}
+    <div class="alert alert-danger text-center">
+        Sorry, an error was encountered.
+        <span class="font-monospace">Error: unsupported request method.</span>
+    </div>
+{% endif %}
+
+{% endblock %}

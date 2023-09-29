@@ -1,3 +1,6 @@
+import itertools
+import random
+
 from django.views import View
 from django.views.generic import ListView, DetailView, TemplateView
 from django.core.paginator import Paginator, EmptyPage
@@ -12,10 +15,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.urls import reverse
+from django.utils import timezone
 
 from formtools.preview import FormPreview
 
-from .models import Note
+from .models import Note, Collection
 from .forms import NoteForm
 
 UserModel = get_user_model()
@@ -180,6 +184,43 @@ class Discover(View):
         messages.add_message(request, messages.SUCCESS, success_msg)
 
         return HttpResponseRedirect(reverse("notes:discover"))
+
+
+class Drill(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # TODO: count of recently-drilled notes
+        return render(request, "notes/drill.html")
+
+    def post(self, request, *args, **kwargs):
+        # TODO: implement promote, demote
+        values = (
+            Collection.objects.filter(user=request.user)
+            .order_by("-last_drilled")
+            .values_list("id", "note_id", "promoted")
+        )
+        unzipped_values = tuple(zip(*values))
+        # Collection must have at least two notes:
+        if len(unzipped_values[0]) < 2:
+            return render(
+                request, "notes/drill.html", {"error": "insufficient-collection"}
+            )
+        # Last-drilled note should not be picked, hence `[1:]`:
+        coll_pks, note_pks = unzipped_values[0][1:], unzipped_values[1][1:]
+        promoted_vals = unzipped_values[2][1:]
+        # By default, weights drawn from standard power function distribution:
+        n, p = len(coll_pks), 5
+        weights = [p * ((x / n) ** (p - 1)) for x in range(1, n + 1)]
+        # Promoted items have weights drawn from a linear function:
+        for index in itertools.compress(range(n), promoted_vals):
+            weights[index] = p * ((index + 1) / n)
+        draw_index = random.choices(range(n), weights)[0]
+        note = Note.objects.get(pk=note_pks[draw_index])
+
+        Collection.objects.filter(id=coll_pks[draw_index]).update(
+            last_drilled=timezone.now()
+        )
+
+        return render(request, "notes/drill.html", {"note": note})
 
 
 class Start(TemplateView):

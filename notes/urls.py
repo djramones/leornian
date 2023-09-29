@@ -23,6 +23,7 @@ urlpatterns = [
     ),
     path("@<username>/", views.NotesByAuthor.as_view(), name="notes-by-username"),
     path("discover/", views.Discover.as_view(), name="discover"),
+    path("drill/", views.Drill.as_view(), name="drill"),
     re_path(
         r"^(?P<code>[\w-]+)/(?P<action>save|unsave)/$",
         views.CollectionAction.as_view(),
