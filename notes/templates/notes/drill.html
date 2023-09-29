@@ -60,12 +60,17 @@
                 </button>
             </form>
         </div>
-        {# TODO: display count of recently-drilled notes. #}
     {% endif %}
 {% else %}
     <div class="alert alert-danger text-center">
         Sorry, an error was encountered.
         <span class="font-monospace">Error: unsupported request method.</span>
+    </div>
+{% endif %}
+
+{% if not error %}
+    <div class="text-center text-secondary mt-4">
+        <small>{{ recent_drill_count }} note{{ recent_drill_count|pluralize }} in your collection drilled (or added) in the last 24h</small>
     </div>
 {% endif %}
 

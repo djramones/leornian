@@ -188,8 +188,15 @@ class Discover(View):
 
 class Drill(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        # TODO: count of recently-drilled notes
-        return render(request, "notes/drill.html")
+        recent_drill_count = Collection.objects.filter(
+            user=request.user,
+            last_drilled__gt=timezone.now() - timezone.timedelta(hours=24),
+        ).count()
+        return render(
+            request,
+            "notes/drill.html",
+            {"recent_drill_count": recent_drill_count},
+        )
 
     def post(self, request, *args, **kwargs):
         if promote_code := request.POST.get("promote"):
@@ -232,7 +239,19 @@ class Drill(LoginRequiredMixin, View):
             last_drilled=timezone.now()
         )
 
-        return render(request, "notes/drill.html", {"note": note, "promoted": promoted})
+        recent_drill_count = Collection.objects.filter(
+            user=request.user,
+            last_drilled__gt=timezone.now() - timezone.timedelta(hours=24),
+        ).count()
+        return render(
+            request,
+            "notes/drill.html",
+            {
+                "note": note,
+                "promoted": promoted,
+                "recent_drill_count": recent_drill_count,
+            },
+        )
 
 
 class Start(TemplateView):
