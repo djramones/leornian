@@ -78,7 +78,20 @@ class Note(models.Model):
     @property
     def html(self):
         """Render safe HTML from the Markdown-formatted `text` field."""
-        return safestring.mark_safe(MarkdownIt("js-default").render(self.text))
+        return safestring.mark_safe(
+            MarkdownIt("zero")
+            .enable(
+                [
+                    "emphasis",
+                    "strikethrough",
+                    "backticks",
+                    "entity",
+                    "escape",
+                    "list",
+                ]
+            )
+            .render(self.text)
+        )
 
     # ----------
     # META, ETC.
