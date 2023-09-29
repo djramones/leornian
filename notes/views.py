@@ -218,7 +218,7 @@ class Drill(LoginRequiredMixin, View):
         )
         unzipped_values = tuple(zip(*values))
         # Collection must have at least two notes:
-        if len(unzipped_values[0]) < 2:
+        if not unzipped_values or len(unzipped_values[0]) < 2:
             return render(
                 request, "notes/drill.html", {"error": "insufficient-collection"}
             )
