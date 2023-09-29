@@ -21,6 +21,11 @@ urlpatterns = [
         views.MyCollectionByOthers.as_view(),
         name="my-collection-by-others",
     ),
+    path(
+        "collection/promoted/",
+        views.MyCollectionPromoted.as_view(),
+        name="my-collection-promoted",
+    ),
     path("@<username>/", views.NotesByAuthor.as_view(), name="notes-by-username"),
     path("discover/", views.Discover.as_view(), name="discover"),
     path("drill/", views.Drill.as_view(), name="drill"),

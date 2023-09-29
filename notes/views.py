@@ -116,6 +116,15 @@ class MyCollectionByOthers(MyCollection):
         return qs.exclude(author=self.request.user)
 
 
+class MyCollectionPromoted(MyCollection):
+    def get_queryset(self):
+        return (
+            Note.objects.filter(collectors=self.request.user, collection__promoted=True)
+            .select_related("author")
+            .annotate_for_controls(self.request.user)
+        )
+
+
 class SingleNote(DetailView):
     model = Note
     slug_field = "code"
