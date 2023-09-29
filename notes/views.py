@@ -192,7 +192,18 @@ class Drill(LoginRequiredMixin, View):
         return render(request, "notes/drill.html")
 
     def post(self, request, *args, **kwargs):
-        # TODO: implement promote, demote
+        if promote_code := request.POST.get("promote"):
+            # Make sure to filter by user to prevent modifying other users' data
+            Collection.objects.filter(
+                note__code=promote_code, user=request.user
+            ).update(promoted=True)
+            messages.add_message(request, messages.SUCCESS, "A note has been promoted.")
+        if demote_code := request.POST.get("demote"):
+            Collection.objects.filter(note__code=demote_code, user=request.user).update(
+                promoted=False
+            )
+            messages.add_message(request, messages.SUCCESS, "A note has been demoted.")
+
         values = (
             Collection.objects.filter(user=request.user)
             .order_by("-last_drilled")
@@ -214,13 +225,14 @@ class Drill(LoginRequiredMixin, View):
         for index in itertools.compress(range(n), promoted_vals):
             weights[index] = p * ((index + 1) / n)
         draw_index = random.choices(range(n), weights)[0]
-        note = Note.objects.get(pk=note_pks[draw_index])
+        note = Note.objects.select_related("author").get(pk=note_pks[draw_index])
+        promoted = Collection.objects.get(id=coll_pks[draw_index]).promoted
 
         Collection.objects.filter(id=coll_pks[draw_index]).update(
             last_drilled=timezone.now()
         )
 
-        return render(request, "notes/drill.html", {"note": note})
+        return render(request, "notes/drill.html", {"note": note, "promoted": promoted})
 
 
 class Start(TemplateView):
