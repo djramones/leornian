@@ -1,8 +1,11 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
+from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth import get_user_model
 
-from .models import Note
+from .models import Collection, Note
+from .utils import generate_lorem_ipsum, generate_reference_code
 
 UserModel = get_user_model()
 
@@ -151,6 +154,53 @@ An autolink: <https://reversedelay.net/>
 
 
 class ModelsTests(TestCase):
+    def test_notequeryset_annotate_for_controls(self):
+        user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
+        note = Note.objects.create()
+
+        qs = Note.objects.annotate_for_controls(AnonymousUser)
+        with self.assertRaises(AttributeError):
+            qs[0].saved
+
+        qs = Note.objects.annotate_for_controls(user)
+        self.assertFalse(qs[0].saved)
+
+        user.collected_notes.add(note)
+        qs = Note.objects.annotate_for_controls(user)
+        self.assertTrue(qs[0].saved)
+
+    def test_notequeryset_get_random(self):
+        """
+        Test get_random()
+
+        We create one note at a time only to get deterministic results.
+        """
+        user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
+
+        # Default case
+        note = Note.objects.create()
+        fetched_note = Note.objects.get_random()
+        self.assertEqual(note.id, fetched_note.id)
+        note.delete()
+
+        # Exclude unlisted notes
+        note = Note.objects.create(visibility=Note.Visibility.UNLISTED)
+        self.assertEqual(Note.objects.get_random(), None)
+        note.delete()
+
+        # Exclude collected by user
+        note = Note.objects.create()
+        user.collected_notes.add(note)
+        self.assertEqual(Note.objects.get_random(user), None)
+        self.assertEqual(Note.objects.get_random().id, note.id)
+        note.delete()
+
+        # Exclude authored by user
+        note = Note.objects.create(author=user)
+        self.assertEqual(Note.objects.get_random(user), None)
+        self.assertEqual(Note.objects.get_random().id, note.id)
+        note.delete()
+
     def test_note_safe_markdown_rendering(self):
         note = Note.objects.create(text=SAFE_MARKDOWN_INPUT)
         html = note.html
@@ -198,3 +248,45 @@ class ModelsTests(TestCase):
             "<p>![Image](https://reversedelay.files.wordpress.com/2023/08/bike.jpg)</p>",
             html,
         )
+
+    def test_note_default_ordering(self):
+        Note.objects.create(text="first")
+        Note.objects.create(text="second")
+        self.assertEqual(Note.objects.all()[0].text, "second")
+        self.assertEqual(Note.objects.all()[1].text, "first")
+
+    def test_note_str(self):
+        """Test Note.__str__()"""
+        note = Note.objects.create()
+        self.assertEqual(str(note), note.code)
+
+    def test_collection_unique_collect_constraint(self):
+        user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
+
+        note = Note.objects.create()
+        user.collected_notes.add(note)
+        # Add again, should not create new collection record:
+        user.collected_notes.add(note)
+        self.assertEqual(Collection.objects.count(), 1)
+        self.assertEqual(user.collected_notes.count(), 1)
+
+        # Directly with Collection.objects.create():
+        with self.assertRaises(IntegrityError):
+            Collection.objects.create(user=user, note=note)
+
+
+# TODO: ViewsTests
+# TODO: TemplatesTests
+# TODO: TemplateTagsTests
+# TODO: URLsTests
+
+
+class UtilsTests(TestCase):
+    def test_generate_reference_code(self):
+        code = generate_reference_code()
+        self.assertRegex(code, "[0-9A-Z]{8}")
+
+    def test_generate_lorem_ipsum(self):
+        text = generate_lorem_ipsum()
+        self.assertEqual(text[:5], "Lorem")
+        generate_lorem_ipsum(rich=True)
