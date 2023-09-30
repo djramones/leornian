@@ -1,11 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.db import IntegrityError
-from django.test import TestCase
+from django.http import Http404
+from django.test import TestCase, RequestFactory
+from django.views.generic import ListView
 from django.urls import reverse
 
 from .models import Collection, Note
 from .utils import generate_lorem_ipsum, generate_reference_code
+from . import views
 
 UserModel = get_user_model()
 
@@ -275,7 +278,27 @@ class ModelsTests(TestCase):
             Collection.objects.create(user=user, note=note)
 
 
-# TODO: ViewsTests
+class ViewsTests(TestCase):
+    def test_gracefullistview(self):
+        Note.objects.create(text="Foo")
+        req = RequestFactory().get("/test/", {"page": 2})
+        req.user = AnonymousUser()
+
+        # Test default ListView behavior:
+        with self.assertRaises(Http404):
+            ListView.as_view(model=Note, paginate_by=10)(req)
+        # GracefulListView, meanwhile, should not 404:
+        res = views.GracefulListView.as_view(model=Note, paginate_by=10)(req)
+        self.assertEqual(res.status_code, 200)
+        # Negative page numbers should still 404:
+        req = RequestFactory().get("/test/", {"page": -1})
+        req.user = AnonymousUser()
+        with self.assertRaises(Http404):
+            res = views.GracefulListView.as_view(model=Note, paginate_by=10)(req)
+
+    # TODO: more views tests
+
+
 # TODO: TemplatesTests
 # TODO: TemplateTagsTests
 # TODO: URLsTests
