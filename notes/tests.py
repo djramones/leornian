@@ -12,7 +12,7 @@ class BasicTests(TestCase):
         self.note = Note.objects.create()
         self.user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
 
-    def test_basic_get_requests_unauthenticated(self):
+    def test_basic_requests_unauthenticated(self):
         response = self.client.get(reverse("notes:create-note"))
         self.assertEqual(response.status_code, 302)
         response = self.client.get(reverse("notes:my-collection"))
@@ -52,7 +52,7 @@ class BasicTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_basic_get_requests_authenticated(self):
+    def test_basic_requests_authenticated(self):
         self.client.login(username="juan", password="1234")
 
         response = self.client.get(reverse("notes:create-note"))
@@ -166,9 +166,9 @@ class ModelsTests(TestCase):
         )
         self.assertInHTML("<s>Strikethrough with tildes</s>", html)
         self.assertInHTML("<code>os.urandom(16)</code>", html)
-        self.assertIn("HTML entities: —, –, ©", html)
-        self.assertIn(
-            "Backslash escapes: *asterisk emphasis*, _underscore emphasis_, HTML entity: &amp;mdash;",
+        self.assertInHTML("<p>HTML entities: —, –, ©.</p>", html)
+        self.assertInHTML(
+            "<p>Backslash escapes: *asterisk emphasis*, _underscore emphasis_, HTML entity: &amp;mdash;.</p>",
             html,
         )
         self.assertInHTML(
