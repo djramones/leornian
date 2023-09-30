@@ -158,7 +158,7 @@ class ModelsTests(TestCase):
         user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
         note = Note.objects.create()
 
-        qs = Note.objects.annotate_for_controls(AnonymousUser)
+        qs = Note.objects.annotate_for_controls(AnonymousUser())
         with self.assertRaises(AttributeError):
             qs[0].saved
 
