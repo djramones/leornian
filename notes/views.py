@@ -1,26 +1,26 @@
 import itertools
 import random
 
-from django.views import View
-from django.views.generic import ListView, DetailView, TemplateView
-from django.core.paginator import Paginator, EmptyPage
-from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.utils.safestring import mark_safe
-from django.utils.http import url_has_allowed_host_and_scheme
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, render
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.core.paginator import EmptyPage, Paginator
+from django.db import transaction
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.safestring import mark_safe
+from django.views import View
+from django.views.generic import DetailView, ListView, TemplateView
 
 from formtools.preview import FormPreview
 
-from .models import Note, Collection
 from .forms import NoteForm
+from .models import Collection, Note
 
 UserModel = get_user_model()
 
