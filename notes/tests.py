@@ -204,6 +204,18 @@ class ModelsTests(TestCase):
         self.assertEqual(Note.objects.get_random().id, note.id)
         note.delete()
 
+    def test_note_author_on_delete(self):
+        user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
+        note = Note.objects.create(author=user)
+        self.assertEqual(UserModel.objects.count(), 1)
+        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(note.author, user)
+        user.delete()
+        self.assertEqual(UserModel.objects.count(), 0)
+        self.assertEqual(Note.objects.count(), 1)
+        # Need to reload the object from DB to see on_delete effect:
+        self.assertEqual(Note.objects.get(id=note.id).author, None)
+
     def test_note_safe_markdown_rendering(self):
         note = Note.objects.create(text=SAFE_MARKDOWN_INPUT)
         html = note.html
@@ -262,6 +274,30 @@ class ModelsTests(TestCase):
         """Test Note.__str__()"""
         note = Note.objects.create()
         self.assertEqual(str(note), note.code)
+
+    def test_collection_on_delete(self):
+        user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
+        note = Note.objects.create()
+        user.collected_notes.add(note)
+        self.assertEqual(UserModel.objects.count(), 1)
+        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(Collection.objects.count(), 1)
+
+        # Case: deleting note
+        note.delete()
+        self.assertEqual(UserModel.objects.count(), 1)
+        self.assertEqual(Note.objects.count(), 0)
+        self.assertEqual(Collection.objects.count(), 0)
+
+        # Replace note
+        user.collected_notes.add(Note.objects.create())
+        self.assertEqual(Collection.objects.count(), 1)
+
+        # Case: deleting user
+        user.delete()
+        self.assertEqual(UserModel.objects.count(), 0)
+        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(Collection.objects.count(), 0)
 
     def test_collection_unique_collect_constraint(self):
         user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
