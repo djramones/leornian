@@ -5,6 +5,7 @@ from django.http import Http404
 from django.test import TestCase, RequestFactory
 from django.views.generic import ListView
 from django.urls import reverse
+import formtools
 
 from .models import Collection, Note
 from .utils import generate_lorem_ipsum, generate_reference_code
@@ -315,6 +316,9 @@ class ModelsTests(TestCase):
 
 
 class ViewsTests(TestCase):
+    def setUp(self):
+        self.user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
+
     def test_gracefullistview(self):
         Note.objects.create(text="Foo")
         req = RequestFactory().get("/test/", {"page": 2})
@@ -331,6 +335,39 @@ class ViewsTests(TestCase):
         req.user = AnonymousUser()
         with self.assertRaises(Http404):
             res = views.GracefulListView.as_view(model=Note, paginate_by=10)(req)
+
+    def test_create_note_view(self):
+        self.client.login(username="juan", password="1234")
+
+        # GET initial form
+        res = self.client.get(reverse("notes:create-note"))
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "notes/note_form.html")
+
+        # POST to preview
+        res = self.client.post(
+            reverse("notes:create-note"),
+            {"text": "Foo *bar*.", "visibility": Note.Visibility.NORMAL, "stage": 1},
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "notes/note_form_preview.html")
+
+        # POST to submit
+        form_hash = formtools.utils.form_hmac(
+            views.NoteForm({"text": "Foo *bar*.", "visibility": Note.Visibility.NORMAL})
+        )
+        res = self.client.post(
+            reverse("notes:create-note"),
+            {
+                "text": "Foo *bar*.",
+                "visibility": Note.Visibility.NORMAL,
+                "stage": 2,
+                "hash": form_hash,
+            },
+        )
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(Note.objects.count(), 1)
+        self.assertEqual(Note.objects.all()[0].text, "Foo *bar*.")
 
     # TODO: more views tests
 
