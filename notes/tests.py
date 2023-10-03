@@ -367,7 +367,10 @@ class ViewsTests(TestCase):
         )
         self.assertEqual(res.status_code, 302)
         self.assertEqual(Note.objects.count(), 1)
-        self.assertEqual(Note.objects.all()[0].text, "Foo *bar*.")
+        note = Note.objects.all()[0]
+        self.assertEqual(note.text, "Foo *bar*.")
+        self.assertEqual(Collection.objects.count(), 1)
+        self.assertEqual(self.user.collected_notes.all()[0].id, note.id)
 
     # TODO: more views tests
 
