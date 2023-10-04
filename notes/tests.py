@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import ImproperlyConfigured
 from django.db import IntegrityError
 from django.http import Http404
 from django.test import TestCase, RequestFactory
@@ -317,11 +318,12 @@ class ModelsTests(TestCase):
 
 class ViewsTests(TestCase):
     def setUp(self):
+        self.factory = RequestFactory()
         self.user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
 
-    def test_gracefullistview(self):
+    def test_GracefulListView(self):
         Note.objects.create(text="Foo")
-        req = RequestFactory().get("/test/", {"page": 2})
+        req = self.factory.get("/test/", {"page": 2})
         req.user = AnonymousUser()
 
         # Test default ListView behavior:
@@ -371,6 +373,41 @@ class ViewsTests(TestCase):
         self.assertEqual(note.text, "Foo *bar*.")
         self.assertEqual(Collection.objects.count(), 1)
         self.assertEqual(self.user.collected_notes.all()[0].id, note.id)
+
+    def test_NotesByAuthor_view(self):
+        req = self.factory.get("/test/")
+        req.user = AnonymousUser()
+
+        with self.assertRaises(ImproperlyConfigured):
+            views.NotesByAuthor.as_view()(req)
+
+        with self.assertRaises(Http404):
+            views.NotesByAuthor.as_view()(req, username="nonexistentuser")
+
+        # Check get_queryset():
+        view = views.NotesByAuthor()
+        view.setup(req, username=self.user.username)
+        self.assertEqual(len(view.get_queryset()), 0)
+        note = Note.objects.create()
+        self.assertNotIn(note, view.get_queryset())
+        note = Note.objects.create(
+            author=self.user, visibility=Note.Visibility.UNLISTED
+        )
+        self.assertNotIn(note, view.get_queryset())
+        note = Note.objects.create(author=self.user)
+        self.assertIn(note, view.get_queryset())
+
+        for _ in range(15):
+            # Create multiple objects for testing for N+1 queries:
+            Note.objects.create(author=self.user)
+        with self.assertNumQueries(4):  # test for N+1 queries
+            res = self.client.get(
+                reverse(
+                    "notes:notes-by-username", kwargs={"username": self.user.username}
+                )
+            )
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "notes/note_list.html")
 
     # TODO: more views tests
 
