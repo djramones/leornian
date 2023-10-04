@@ -198,7 +198,7 @@ class Discover(View):
 class Drill(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         coll_count = Collection.objects.filter(user=request.user).count()
-        disable_begin = True if coll_count < 2 else False
+        disable_begin = bool(coll_count < 2)
         recent_drill_count = Collection.objects.filter(
             user=request.user,
             last_drilled__gt=timezone.now() - timezone.timedelta(hours=24),
