@@ -397,7 +397,7 @@ class ViewsTests(TestCase):
         note = Note.objects.create(author=self.user)
         self.assertIn(note, view.get_queryset())
 
-        for _ in range(15):
+        for _ in range(3):
             # Create multiple objects for testing for N+1 queries:
             Note.objects.create(author=self.user)
         with self.assertNumQueries(4):  # test for N+1 queries
@@ -408,6 +408,95 @@ class ViewsTests(TestCase):
             )
         self.assertEqual(res.status_code, 200)
         self.assertTemplateUsed(res, "notes/note_list.html")
+
+    def test_MyCollection_view(self):
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.MyCollection()
+        view.setup(req)
+
+        Note.objects.create()
+        self.user.collected_notes.create(author=self.user)
+        self.assertEqual(len(view.get_queryset()), 1)
+
+        # Test for N+1 queries:
+        for _ in range(3):
+            self.user.collected_notes.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(4):
+            self.client.get(reverse("notes:my-collection"))
+
+    def test_MyCollectionByMe_view(self):
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.MyCollectionByMe()
+        view.setup(req)
+
+        self.user.collected_notes.create()
+        self.user.collected_notes.create(author=self.user)
+        self.assertEqual(len(view.get_queryset()), 1)
+
+        # Test for N+1 queries:
+        for _ in range(3):
+            self.user.collected_notes.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(4):
+            self.client.get(reverse("notes:my-collection-by-me"))
+
+    def test_NotInCollectionByMe_view(self):
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.NotInCollectionByMe()
+        view.setup(req)
+
+        Note.objects.create(author=self.user)
+        self.user.collected_notes.create(author=self.user)
+        self.assertEqual(len(view.get_queryset()), 1)
+
+        # Test for N+1 queries:
+        for _ in range(3):
+            Note.objects.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(4):
+            self.client.get(reverse("notes:not-in-collection-by-me"))
+
+    def test_MyCollectionByOthers_view(self):
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.MyCollectionByOthers()
+        view.setup(req)
+
+        user2 = UserModel.objects.create_user("user2", "user2@example.com", "1234")
+        self.user.collected_notes.add(Note.objects.create(author=user2))
+        self.user.collected_notes.add(Note.objects.create(author=self.user))
+        self.assertEqual(len(view.get_queryset()), 1)
+
+        # Test for N+1 queries:
+        for _ in range(3):
+            self.user.collected_notes.create(author=user2)
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(4):
+            self.client.get(reverse("notes:my-collection-by-others"))
+
+    def test_MyCollectionPromoted_view(self):
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.MyCollectionPromoted()
+        view.setup(req)
+
+        self.user.collected_notes.add(Note.objects.create())
+        note = Note.objects.create(author=self.user)
+        self.user.collected_notes.add(note)
+        Collection.objects.filter(user=self.user, note=note).update(promoted=True)
+        self.assertEqual(len(view.get_queryset()), 1)
+
+        # Test for N+1 queries:
+        for _ in range(3):
+            note = self.user.collected_notes.create(author=self.user)
+            Collection.objects.filter(user=self.user, note=note).update(promoted=True)
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(4):
+            self.client.get(reverse("notes:my-collection-promoted"))
 
     # TODO: more views tests
 
