@@ -281,4 +281,37 @@ class ViewsTests(TestCase):
         self.assertContains(res, "Note saved to collection")
         self.assertNotContains(res, "View saved note")
 
+    def test_Discover_get_unauthenticated(self):
+        Note.objects.create(text="86b337cf632a2c99")
+        # With only one note, fetching is deterministic.
+        res = self.client.get(reverse("notes:discover"))
+        self.assertContains(res, "86b337cf632a2c99")
+
+    def test_Discover_get_authenticated(self):
+        self.user.collected_notes.create(text="d9b3ff70ef1682d3")
+        # With only one note, fetching is deterministic.
+        self.client.login(username="juan", password="1234")
+        res = self.client.get(reverse("notes:discover"))
+        self.assertNotContains(res, "d9b3ff70ef1682d3")
+
+    def test_Discover_post_unauthenticated(self):
+        note = Note.objects.create()
+        res = self.client.post(reverse("notes:discover"), {"code": note.code})
+        self.assertEqual(res.status_code, 403)
+
+    def test_Discover_post_authenticated(self):
+        note = Note.objects.create()
+        self.client.login(username="juan", password="1234")
+        self.assertEqual(self.user.collected_notes.count(), 0)
+        res = self.client.post(reverse("notes:discover"), {"code": note.code})
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(self.user.collected_notes.count(), 1)
+        self.assertEqual(self.user.collected_notes.all()[0].id, note.id)
+        self.assertEqual(res.url, reverse("notes:discover"))
+        res = self.client.get(res.url)
+        self.assertContains(res, "A note has been saved to your collection.")
+        self.assertContains(
+            res, f" <a href='{note.get_absolute_url()}'>View saved note</a>", html=True
+        )
+
     # TODO: more views tests
