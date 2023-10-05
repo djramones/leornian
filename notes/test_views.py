@@ -195,4 +195,13 @@ class ViewsTests(TestCase):
         with self.assertNumQueries(4):
             self.client.get(reverse("notes:my-collection-promoted"))
 
+    def test_SingleNote_view(self):
+        note = Note.objects.create(author=self.user)
+        res = self.client.get(reverse("notes:single-note", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 200)
+
+        self.client.login(username="juan", password="1234")
+        res = self.client.get(reverse("notes:single-note", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 200)
+
     # TODO: more views tests
