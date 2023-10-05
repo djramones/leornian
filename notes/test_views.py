@@ -123,7 +123,8 @@ class ViewsTests(TestCase):
             self.user.collected_notes.create(author=self.user)
         self.client.login(username="juan", password="1234")
         with self.assertNumQueries(4):
-            self.client.get(reverse("notes:my-collection"))
+            res = self.client.get(reverse("notes:my-collection"))
+        self.assertEqual(res.status_code, 200)
 
     def test_MyCollectionByMe_view(self):
         req = self.factory.get("/test/")
@@ -140,7 +141,8 @@ class ViewsTests(TestCase):
             self.user.collected_notes.create(author=self.user)
         self.client.login(username="juan", password="1234")
         with self.assertNumQueries(4):
-            self.client.get(reverse("notes:my-collection-by-me"))
+            res = self.client.get(reverse("notes:my-collection-by-me"))
+        self.assertEqual(res.status_code, 200)
 
     def test_NotInCollectionByMe_view(self):
         req = self.factory.get("/test/")
@@ -157,7 +159,8 @@ class ViewsTests(TestCase):
             Note.objects.create(author=self.user)
         self.client.login(username="juan", password="1234")
         with self.assertNumQueries(4):
-            self.client.get(reverse("notes:not-in-collection-by-me"))
+            res = self.client.get(reverse("notes:not-in-collection-by-me"))
+        self.assertEqual(res.status_code, 200)
 
     def test_MyCollectionByOthers_view(self):
         req = self.factory.get("/test/")
@@ -175,7 +178,8 @@ class ViewsTests(TestCase):
             self.user.collected_notes.create(author=user2)
         self.client.login(username="juan", password="1234")
         with self.assertNumQueries(4):
-            self.client.get(reverse("notes:my-collection-by-others"))
+            res = self.client.get(reverse("notes:my-collection-by-others"))
+        self.assertEqual(res.status_code, 200)
 
     def test_MyCollectionPromoted_view(self):
         req = self.factory.get("/test/")
@@ -195,7 +199,8 @@ class ViewsTests(TestCase):
             Collection.objects.filter(user=self.user, note=note).update(promoted=True)
         self.client.login(username="juan", password="1234")
         with self.assertNumQueries(4):
-            self.client.get(reverse("notes:my-collection-promoted"))
+            res = self.client.get(reverse("notes:my-collection-promoted"))
+        self.assertEqual(res.status_code, 200)
 
     def test_SingleNote_view(self):
         note = Note.objects.create(author=self.user)
@@ -407,6 +412,7 @@ class ViewsTests(TestCase):
         ).last_drilled
         # With just two notes, the drill draw is deterministic:
         res = self.client.post(reverse("notes:drill"))
+        self.assertEqual(res.status_code, 200)
         self.assertEqual(res.context["note"].id, note_old.id)
         self.assertEqual(res.context["promoted"], True)
         self.assertEqual(res.context["recent_drill_count"], 2)
