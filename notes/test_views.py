@@ -1,10 +1,12 @@
 import formtools
+import time
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import ListView
 
 from . import views
@@ -314,4 +316,110 @@ class ViewsTests(TestCase):
             res, f" <a href='{note.get_absolute_url()}'>View saved note</a>", html=True
         )
 
-    # TODO: more views tests
+    def test_Drill_unauthenticated(self):
+        res = self.client.get(reverse("notes:drill"))
+        self.assertEqual(res.status_code, 302)
+        res = self.client.post(reverse("notes:drill"))
+        self.assertEqual(res.status_code, 302)
+
+    def test_Drill_get(self):
+        self.client.login(username="juan", password="1234")
+        res = self.client.get(reverse("notes:drill"))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context["disable_begin"], True)
+        self.assertEqual(res.context["recent_drill_count"], 0)
+
+        self.user.collected_notes.create()  # first collection record
+        note = Note.objects.create()
+        Collection.objects.create(
+            user=self.user,
+            note=note,
+            last_drilled=timezone.now() - timezone.timedelta(hours=25),
+        )  # second collection record
+        res = self.client.get(reverse("notes:drill"))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context["disable_begin"], False)
+        self.assertEqual(res.context["recent_drill_count"], 1)
+
+    def test_Drill_generate_weights(self):
+        self.assertEqual(views.Drill.generate_weights([]), [])
+        self.assertEqual(
+            views.Drill.generate_weights([False, True, False]),
+            [0.061728395061728385, 3.333333333333333, 5.0],
+        )
+        self.assertEqual(
+            views.Drill.generate_weights([True, False, True, False, False, True]),
+            [
+                0.8333333333333333,
+                0.061728395061728385,
+                2.5,
+                0.9876543209876542,
+                2.411265432098766,
+                5.0,
+            ],
+        )
+
+    def test_Drill_promote(self):
+        self.client.login(username="juan", password="1234")
+        note = Note.objects.create()
+        self.user.collected_notes.add(note)
+        self.assertEqual(
+            Collection.objects.get(note=note, user=self.user).promoted, False
+        )
+        res = self.client.post(reverse("notes:drill"), {"promote": note.code})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(
+            Collection.objects.get(note=note, user=self.user).promoted, True
+        )
+
+    def test_Drill_demote(self):
+        self.client.login(username="juan", password="1234")
+        note = Note.objects.create()
+        self.user.collected_notes.add(note)
+        Collection.objects.filter(note=note, user=self.user).update(promoted=True)
+        res = self.client.post(reverse("notes:drill"), {"demote": note.code})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(
+            Collection.objects.get(note=note, user=self.user).promoted, False
+        )
+
+    def test_Drill_insufficient_collection(self):
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(reverse("notes:drill"))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.context["error"], "insufficient-collection")
+
+    def test_Drill_draw(self):
+        self.client.login(username="juan", password="1234")
+        # Add one note to collection...
+        note_old = Note.objects.create()
+        self.user.collected_notes.add(note_old)
+        Collection.objects.filter(note=note_old, user=self.user).update(promoted=True)
+        note_old_pre_last_drilled = Collection.objects.get(
+            note=note_old, user=self.user
+        ).last_drilled
+        # ...and then add another:
+        time.sleep(0.001)  # just to ensure that the timestamps increment
+        note_new = Note.objects.create()
+        self.user.collected_notes.add(note_new)
+        note_new_pre_last_drilled = Collection.objects.get(
+            note=note_new, user=self.user
+        ).last_drilled
+        # With just two notes, the drill draw is deterministic:
+        res = self.client.post(reverse("notes:drill"))
+        self.assertEqual(res.context["note"].id, note_old.id)
+        self.assertEqual(res.context["promoted"], True)
+        self.assertEqual(res.context["recent_drill_count"], 2)
+        note_old_post_last_drilled = Collection.objects.get(
+            note=note_old, user=self.user
+        ).last_drilled
+        note_new_post_last_drilled = Collection.objects.get(
+            note=note_new, user=self.user
+        ).last_drilled
+        self.assertGreater(note_old_post_last_drilled, note_old_pre_last_drilled)
+        self.assertEqual(note_new_post_last_drilled, note_new_pre_last_drilled)
+
+    def test_Start_view(self):
+        req = self.factory.get("/test/")
+        res = views.Start.as_view()(req)
+        self.assertEqual(res.status_code, 200)

@@ -209,6 +209,29 @@ class Drill(LoginRequiredMixin, View):
             {"disable_begin": disable_begin, "recent_drill_count": recent_drill_count},
         )
 
+    @staticmethod
+    def generate_weights(promotion_statuses):
+        """Generate a list of weights for use in random selection.
+
+        The return value is intended for use with `random.choices()`. Larger
+        weights are given to items toward the end of a sequence of objects,
+        but items can also be promoted to increase their chances of being
+        drawn.
+
+        :param promotion_statuses: A sequence of boolean values representing
+            the promotion (prioritization) status of the corresponding item in
+            the sequence of objects from which a selection is to be made.
+        """
+        n = len(promotion_statuses)
+        # By default, weights are drawn from a standard power function
+        # distribution with parameter `p`:
+        p = 5
+        weights = [p * ((x / n) ** (p - 1)) for x in range(1, n + 1)]
+        # Promoted items have weights drawn from a linear function:
+        for index in itertools.compress(range(n), promotion_statuses):
+            weights[index] = p * ((index + 1) / n)
+        return weights
+
     def post(self, request, *args, **kwargs):
         if promote_code := request.POST.get("promote"):
             # Make sure to filter by user to prevent modifying other users' data
@@ -236,13 +259,8 @@ class Drill(LoginRequiredMixin, View):
         # Last-drilled note should not be picked, hence `[1:]`:
         coll_pks, note_pks = unzipped_values[0][1:], unzipped_values[1][1:]
         promoted_vals = unzipped_values[2][1:]
-        # By default, weights drawn from standard power function distribution:
-        n, p = len(coll_pks), 5
-        weights = [p * ((x / n) ** (p - 1)) for x in range(1, n + 1)]
-        # Promoted items have weights drawn from a linear function:
-        for index in itertools.compress(range(n), promoted_vals):
-            weights[index] = p * ((index + 1) / n)
-        draw_index = random.choices(range(n), weights)[0]
+        weights = self.generate_weights(promoted_vals)
+        draw_index = random.choices(range(len(weights)), weights)[0]
         note = Note.objects.select_related("author").get(pk=note_pks[draw_index])
         promoted = Collection.objects.get(id=coll_pks[draw_index]).promoted
 
