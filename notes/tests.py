@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.db import IntegrityError
-from django.test import TestCase
-from django.urls import reverse
+from django.template import Context, Template
+from django.template.loader import render_to_string
+from django.test import RequestFactory, TestCase, override_settings
+from django.urls import reverse, resolve, Resolver404
 
 from .models import Collection, Note
 from .utils import generate_lorem_ipsum, generate_reference_code
@@ -311,15 +313,123 @@ class ModelsTests(TestCase):
             Collection.objects.create(user=user, note=note)
 
 
-# TODO: TemplatesTests
-# TODO: TemplateTagsTests
-# TODO: URLsTests
+class TemplatesTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_my_collection_html(self):
+        req = self.factory.get("/test/")
+
+        # notes:my-collection
+        req.resolver_match = resolve(reverse("notes:my-collection"))
+        out = render_to_string("notes/my-collection.html", {"request": req})
+        self.assertInHTML('<a class="nav-link active" href="/collection/">All</a>', out)
+
+        # notes:my-collection-by-me
+        req.resolver_match = resolve(reverse("notes:my-collection-by-me"))
+        out = render_to_string("notes/my-collection.html", {"request": req})
+        self.assertInHTML(
+            '<a class="nav-link active" href="/collection/by-me/">By Me</a>', out
+        )
+        self.assertInHTML(
+            f'<p>You can also view <a class="link-secondary" href="{reverse("notes:not-in-collection-by-me")}">notes authored by you but removed from your collection</a>, if any.</p>',
+            out,
+        )
+
+        # notes:not-in-collection-by-me
+        req.resolver_match = resolve(reverse("notes:not-in-collection-by-me"))
+        out = render_to_string("notes/my-collection.html", {"request": req})
+        self.assertInHTML(
+            '<a class="nav-link" href="/collection/by-me/">By Me</a>', out
+        )
+        self.assertInHTML(
+            '<div class="alert alert-info text-center">These notes are authored by you but are not in your collection.</div>',
+            out,
+        )
+
+        # notes:my-collection-by-others
+        req.resolver_match = resolve(reverse("notes:my-collection-by-others"))
+        out = render_to_string("notes/my-collection.html", {"request": req})
+        self.assertInHTML(
+            '<a class="nav-link active" href="/collection/by-others/">By Others</a>',
+            out,
+        )
+
+        # notes:my-collection-promoted
+        req.resolver_match = resolve(reverse("notes:my-collection-promoted"))
+        out = render_to_string("notes/my-collection.html", {"request": req})
+        self.assertInHTML(
+            '<a class="nav-link active" href="/collection/promoted/">Promoted</a>', out
+        )
+        self.assertInHTML(
+            f'<p>These are the notes in your collection that are promoted in <a class="link-secondary" href="{reverse("notes:drill")}">drill</a>.</p>',
+            out,
+        )
+
+
+class NoteControlsTemplateTagTests(TestCase):
+    def setUp(self):
+        self.note = Note.objects.create()
+        self.user = UserModel.objects.create_user("juan", "juan@example.com", "1234")
+        self.request = RequestFactory().get("/test-9ebb5a63/")
+
+    def test_note_controls_unauthenticated(self):
+        self.note.saved = False
+        self.request.user = AnonymousUser()
+        out = Template(
+            "{% load note_controls %}{% note_controls note request %}"
+        ).render(Context({"note": self.note, "request": self.request}))
+        self.assertHTMLEqual(out, '<div class="d-flex flex-wrap gap-3">')
+
+    def test_note_controls_authenticated_saved(self):
+        self.note.saved = True
+        self.request.user = self.user
+        out = Template(
+            "{% load note_controls %}{% note_controls note request %}"
+        ).render(Context({"note": self.note, "request": self.request}))
+        self.assertIn("Unsave", out)
+        self.assertIn("/test-9ebb5a63/", out)
+        self.assertNotIn("Save", out)
+
+    def test_note_controls_authenticated_unsaved(self):
+        self.note.saved = False
+        self.request.user = self.user
+        out = Template(
+            "{% load note_controls %}{% note_controls note request %}"
+        ).render(Context({"note": self.note, "request": self.request}))
+        self.assertIn("Save", out)
+        self.assertIn("/test-9ebb5a63/", out)
+        self.assertNotIn("Unsave", out)
+
+
+class NoteExtrasTemplateTagTests(TestCase):
+    def test_note_vis_badge(self):
+        note = Note.objects.create(visibility=Note.Visibility.NORMAL)
+        label = note.get_visibility_display()
+        out = Template("{% load note_extras %}{% note_vis_badge note %}").render(
+            Context({"note": note})
+        )
+        self.assertHTMLEqual(
+            out,
+            f'<span class="badge text-bg-success"><i class="bi-eye"></i>{label}</span>',
+        )
+
+
+@override_settings(ROOT_URLCONF="notes.urls")
+class URLsTests(TestCase):
+    def test_urls(self):
+        self.assertEqual(resolve("/@foobar/").view_name, "notes-by-username")
+        self.assertEqual(resolve("/foobar/save/").view_name, "collection-action")
+        self.assertEqual(resolve("/foobar/unsave/").view_name, "collection-action")
+        with self.assertRaises(Resolver404):
+            resolve("/foobar/buzz/")
+        self.assertEqual(resolve("/foobar/").view_name, "single-note")
 
 
 class UtilsTests(TestCase):
     def test_generate_reference_code(self):
         code = generate_reference_code()
-        self.assertRegex(code, "[0-9A-Z]{8}")
+        self.assertRegex(code, "[0-9A-Z]{9}")
 
     def test_generate_lorem_ipsum(self):
         text = generate_lorem_ipsum()

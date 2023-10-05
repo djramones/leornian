@@ -126,6 +126,17 @@ class ViewsTests(TestCase):
             res = self.client.get(reverse("notes:my-collection"))
         self.assertEqual(res.status_code, 200)
 
+    def test_MyCollection_view_template(self):
+        """
+        Test the MyCollection template, which uses request.resolver_match,
+        through a view call.
+        """
+        self.client.login(username="juan", password="1234")
+        res = self.client.get(reverse("notes:my-collection"))
+        self.assertContains(
+            res, '<a class="nav-link active" href="/collection/">All</a>', html=True
+        )
+
     def test_MyCollectionByMe_view(self):
         req = self.factory.get("/test/")
         req.user = self.user
@@ -204,9 +215,12 @@ class ViewsTests(TestCase):
 
     def test_SingleNote_view(self):
         note = Note.objects.create(author=self.user)
+
+        # Unauthenticated:
         res = self.client.get(reverse("notes:single-note", kwargs={"slug": note.code}))
         self.assertEqual(res.status_code, 200)
 
+        # Authenticated:
         self.client.login(username="juan", password="1234")
         res = self.client.get(reverse("notes:single-note", kwargs={"slug": note.code}))
         self.assertEqual(res.status_code, 200)
