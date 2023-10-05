@@ -204,4 +204,81 @@ class ViewsTests(TestCase):
         res = self.client.get(reverse("notes:single-note", kwargs={"slug": note.code}))
         self.assertEqual(res.status_code, 200)
 
+    def test_CollectionAction_action_kwarg(self):
+        req = self.factory.post("/test/")
+        req.user = self.user
+        with self.assertRaises(ImproperlyConfigured):
+            views.CollectionAction.as_view()(req, action="foobar")
+
+    def test_CollectionAction_note404(self):
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse(
+                "notes:collection-action", kwargs={"code": "FOOBAR", "action": "save"}
+            )
+        )
+        self.assertEqual(res.status_code, 404)
+
+    def test_CollectionAction_save(self):
+        note = Note.objects.create()
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse(
+                "notes:collection-action", kwargs={"code": note.code, "action": "save"}
+            )
+        )
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, note.get_absolute_url())
+        self.assertEqual(self.user.collected_notes.all()[0].id, note.id)
+        res = self.client.get(res.url)
+        self.assertContains(res, "Note saved to collection")
+        self.assertContains(
+            res, f"<a href='{note.get_absolute_url()}'>View saved note</a>", html=True
+        )
+
+    def test_CollectionAction_unsave(self):
+        note = Note.objects.create()
+        self.user.collected_notes.add(note)
+        self.assertEqual(self.user.collected_notes.all()[0].id, note.id)
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse(
+                "notes:collection-action",
+                kwargs={"code": note.code, "action": "unsave"},
+            )
+        )
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, note.get_absolute_url())
+        self.assertEqual(self.user.collected_notes.count(), 0)
+        res = self.client.get(res.url)
+        self.assertContains(res, "Note removed from collection")
+        self.assertContains(
+            res, f"<a href='{note.get_absolute_url()}'>View removed note</a>", html=True
+        )
+
+    def test_CollectionAction_redirect_url(self):
+        note = Note.objects.create()
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse(
+                "notes:collection-action", kwargs={"code": note.code, "action": "save"}
+            ),
+            {"redirect_url": "/discover/"},
+        )
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, "/discover/")
+
+    def test_CollectionAction_redirect_url_is_note_absolute_url(self):
+        note = Note.objects.create()
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse(
+                "notes:collection-action", kwargs={"code": note.code, "action": "save"}
+            ),
+            {"redirect_url": note.get_absolute_url()},
+            follow=True,
+        )
+        self.assertContains(res, "Note saved to collection")
+        self.assertNotContains(res, "View saved note")
+
     # TODO: more views tests
