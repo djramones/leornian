@@ -21,7 +21,7 @@ class BasicTests(TestCase):
         # Auth views
         response = self.client.get("/accounts/login/")
         self.assertEqual(response.status_code, 200)
-        response = self.client.get("/accounts/logout/")
+        response = self.client.post("/accounts/logout/")
         self.assertRedirects(response, "/")
 
     def test_basic_requests_authenticated(self):
