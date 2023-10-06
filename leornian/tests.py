@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user, get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.handlers.asgi import ASGIHandler
 from django.core.handlers.wsgi import WSGIHandler
@@ -36,6 +36,7 @@ class BasicTests(TestCase):
             "/accounts/login/", {"username": "mary", "password": "1234"}
         )
         self.assertRedirects(response, "/")
+        self.assertTrue(get_user(self.client).is_authenticated)
 
     def test_basic_requests_authenticated(self):
         UserModel.objects.create_user("mary", "mary@example.com", "1234")
@@ -52,6 +53,7 @@ class BasicTests(TestCase):
         # Auth: perform logout
         response = self.client.post("/accounts/logout/")
         self.assertRedirects(response, "/")
+        self.assertFalse(get_user(self.client).is_authenticated)
 
 
 class XSGISmokeTests(TestCase):
