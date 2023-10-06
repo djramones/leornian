@@ -72,6 +72,12 @@ class BasicTests(TestCase):
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse("notes:my-collection-promoted"))
         self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            reverse("notes:notes-by-username", kwargs={"username": self.user.username})
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse("notes:discover"))
+        self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse("notes:drill"))
         self.assertEqual(response.status_code, 200)
         response = self.client.get(
@@ -102,6 +108,10 @@ class BasicTests(TestCase):
             )
         )
         self.assertEqual(response.status_code, 302)
+        response = self.client.get(
+            reverse("notes:single-note", kwargs={"slug": self.note.code})
+        )
+        self.assertEqual(response.status_code, 200)
 
 
 SAFE_MARKDOWN_INPUT = """Emphasis: *italic with asterisks*, **bold with asterisks**, ***italic and bold with asterisks***; _italic with underscores_, __bold with underscores__, ___italic and bold with underscores___.
