@@ -4,5 +4,6 @@
         "pylint_django",
         "--django-settings-module",
         "leornian.settings"
-    ]
+    ],
+    "pylint.importStrategy": "fromEnvironment"
 }
