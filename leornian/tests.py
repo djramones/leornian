@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import reverse, resolve
 
-from . import views
+from . import context_processors as ctx_procs
 
 UserModel = get_user_model()
 
@@ -162,3 +162,11 @@ class URLsTests(TestCase):
 
         # django.contrib.admin integration
         self.assertEqual(resolve("/admin/login/").view_name, "admin:login")
+
+
+class ContextProcessorsTests(TestCase):
+    def test_colormode(self):
+        req = RequestFactory().get("/test/")
+        self.assertEqual(ctx_procs.colormode(req)["colormode"], None)
+        req.COOKIES.update({"colormode": "dark"})
+        self.assertEqual(ctx_procs.colormode(req)["colormode"], "dark")
