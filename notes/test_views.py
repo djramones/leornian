@@ -225,6 +225,101 @@ class ViewsTests(TestCase):
         res = self.client.get(reverse("notes:single-note", kwargs={"slug": note.code}))
         self.assertEqual(res.status_code, 200)
 
+    def test_DeleteNote_confirm_delete_template(self):
+        """Test template branches through view call."""
+        self.client.login(username="juan", password="1234")
+        note = Note.objects.create()
+
+        # With blocker:
+        res = self.client.get(reverse("notes:delete-note", kwargs={"slug": note.code}))
+        self.assertContains(res, "This note cannot be deleted")
+
+        # Without blocker:
+        Note.objects.filter(pk=note.pk).update(author=self.user)
+        res = self.client.get(reverse("notes:delete-note", kwargs={"slug": note.code}))
+        self.assertContains(res, "Are you sure you want to delete the note below?")
+
+    def test_DeleteNote_get_queryset(self):
+        note = Note.objects.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(5):
+            self.client.get(reverse("notes:delete-note", kwargs={"slug": note.code}))
+
+    def test_DeleteNote_blocker(self):
+        note = Note.objects.create()
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.DeleteNote()
+        view.setup(req, slug=note.code)
+        self.assertEqual(view.blocker(), "not-author")
+
+        Note.objects.filter(pk=note.pk).update(author=self.user)
+        user2 = UserModel.objects.create_user("user2", "user2@example.com", "1234")
+        user2.collected_notes.add(note)
+        self.assertEqual(view.blocker(), "other-collectors")
+
+        user2.collected_notes.remove(note)
+        self.assertEqual(view.blocker(), None)
+
+    def test_DeleteNote_get_context_data(self):
+        note = Note.objects.create()
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.DeleteNote()
+        view.setup(req, slug=note.code)
+        view.object = view.get_object()  # normally done in view.get()
+        self.assertEqual(view.get_context_data()["blocker"], "not-author")
+        self.assertEqual(view.get_context_data()["redirect_url"], "")
+
+    def test_DeleteNote_post(self):
+        note = Note.objects.create()
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(reverse("notes:delete-note", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(Note.objects.count(), 1)
+
+        Note.objects.filter(pk=note.pk).update(author=self.user)
+        res = self.client.post(reverse("notes:delete-note", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(Note.objects.count(), 0)
+
+    def test_DeleteNote_form_valid(self):
+        note = Note.objects.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse("notes:delete-note", kwargs={"slug": note.code}), follow=True
+        )
+        self.assertContains(res, "A note has been deleted")
+
+    def test_DeleteNote_get_success_url(self):
+        # No redirect_url supplied:
+        note = Note.objects.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(reverse("notes:delete-note", kwargs={"slug": note.code}))
+        self.assertEqual(res.url, reverse("notes:my-collection"))
+
+        # redirect_url == Note.get_absolute_url():
+        note = Note.objects.create(author=self.user)
+        res = self.client.post(
+            reverse(
+                "notes:delete-note",
+                kwargs={"slug": note.code},
+            ),
+            {"redirect_url": note.get_absolute_url()},
+        )
+        self.assertEqual(res.url, reverse("notes:my-collection"))
+
+        # Normal case:
+        note = Note.objects.create(author=self.user)
+        res = self.client.post(
+            reverse(
+                "notes:delete-note",
+                kwargs={"slug": note.code},
+            ),
+            {"redirect_url": "/foobar/"},
+        )
+        self.assertEqual(res.url, "/foobar/")
+
     def test_CollectionAction_action_kwarg(self):
         req = self.factory.post("/test/")
         req.user = self.user

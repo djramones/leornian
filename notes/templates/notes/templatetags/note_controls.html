@@ -1,14 +1,41 @@
-<div class="d-flex flex-wrap gap-3">
-    {% for control in controls %}
+<div class="d-flex flex-wrap gap-2 column-gap-3">
+    {% for control in main_controls %}
         <form method="{{ control.method }}" action="{{ control.action }}">
             {% if control.method == "post" %}
                 {% csrf_token %}
-                <input type="hidden" name="redirect_url" value="{{ request.get_full_path_info }}">
             {% endif %}
+            <input type="hidden" name="redirect_url" value="{{ request.get_full_path_info }}">
             <button class="btn btn-link icon-link p-0" type="submit">
                 <i class="bi-{{ control.icon }}"></i>
                 {{ control.text }}
             </button>
         </form>
     {% endfor %}
+    {% if more_controls %}
+        <div class="dropdown d-flex">
+            {# The d-flex in this div, and the align-self-end in the anchor #}
+            {# below, ensures that the underline under "More" aligns with #}
+            {# the underline of the main control links. Yes, this is an OCD #}
+            {# thing. #}
+            <a href="#" class="icon-link align-self-end" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi-three-dots"></i> More
+            </a>
+            <ul class="dropdown-menu shadow">
+                {% for control in more_controls %}
+                    <li>
+                        <form method="{{ control.method }}" action="{{ control.action }}">
+                            {% if control.method == "post" %}
+                                {% csrf_token %}
+                            {% endif %}
+                            <input type="hidden" name="redirect_url" value="{{ request.get_full_path_info }}">
+                            <button class="dropdown-item" type="submit">
+                                <i class="bi-{{ control.icon }}"></i>
+                                {{ control.text }}
+                            </button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 </div>

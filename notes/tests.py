@@ -20,6 +20,10 @@ class BasicTests(TestCase):
     def test_basic_requests_unauthenticated(self):
         response = self.client.get(reverse("notes:create-note"))
         self.assertEqual(response.status_code, 302)
+        response = self.client.get(
+            reverse("notes:delete-note", kwargs={"slug": self.note.code})
+        )
+        self.assertEqual(response.status_code, 302)
         response = self.client.get(reverse("notes:my-collection"))
         self.assertEqual(response.status_code, 302)
         response = self.client.get(reverse("notes:my-collection-by-me"))
@@ -61,6 +65,10 @@ class BasicTests(TestCase):
         self.client.login(username="juan", password="1234")
 
         response = self.client.get(reverse("notes:create-note"))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            reverse("notes:delete-note", kwargs={"slug": self.note.code})
+        )
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse("notes:my-collection"))
         self.assertEqual(response.status_code, 200)
@@ -389,7 +397,7 @@ class NoteControlsTemplateTagTests(TestCase):
         out = Template(
             "{% load note_controls %}{% note_controls note request %}"
         ).render(Context({"note": self.note, "request": self.request}))
-        self.assertHTMLEqual(out, '<div class="d-flex flex-wrap gap-3">')
+        self.assertHTMLEqual(out, '<div class="d-flex flex-wrap gap-2 column-gap-3">')
 
     def test_note_controls_authenticated_saved(self):
         self.note.saved = True
@@ -410,6 +418,17 @@ class NoteControlsTemplateTagTests(TestCase):
         self.assertIn("Save", out)
         self.assertIn("/test-9ebb5a63/", out)
         self.assertNotIn("Unsave", out)
+
+    def test_note_controls_authenticated_user_is_note_author(self):
+        Note.objects.filter(pk=self.note.pk).update(author=self.user)
+        self.note = Note.objects.get(pk=self.note.pk)  # reload from DB
+        self.note.saved = True
+        self.request.user = self.user
+        out = Template(
+            "{% load note_controls %}{% note_controls note request %}"
+        ).render(Context({"note": self.note, "request": self.request}))
+        self.assertIn("Delete", out)
+        self.assertIn("/test-9ebb5a63/", out)
 
 
 class NoteExtrasTemplateTagTests(TestCase):

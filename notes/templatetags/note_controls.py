@@ -6,12 +6,13 @@ register = template.Library()
 
 @register.inclusion_tag("notes/templatetags/note_controls.html")
 def note_controls(note, request):
-    controls = []
+    main_controls = []
+    more_controls = []
 
     if request.user.is_authenticated:
         if not note.saved:
             # Save note to collection
-            controls.append(
+            main_controls.append(
                 {
                     "method": "post",
                     "action": reverse(
@@ -24,7 +25,7 @@ def note_controls(note, request):
             )
         else:
             # Unsave note from collection
-            controls.append(
+            main_controls.append(
                 {
                     "method": "post",
                     "action": reverse(
@@ -35,5 +36,22 @@ def note_controls(note, request):
                     "text": "Unsave",
                 }
             )
+        if note.author == request.user:
+            # Delete note
+            more_controls.append(
+                {
+                    "method": "get",
+                    "action": reverse(
+                        "notes:delete-note",
+                        kwargs={"slug": note.code},
+                    ),
+                    "icon": "trash",
+                    "text": "Delete",
+                }
+            )
 
-    return {"controls": controls, "request": request}
+    return {
+        "main_controls": main_controls,
+        "more_controls": more_controls,
+        "request": request,
+    }

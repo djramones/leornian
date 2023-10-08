@@ -5,6 +5,7 @@ from . import views
 app_name = "notes"
 urlpatterns = [
     path("new/", views.create_note, name="create-note"),
+    path("<slug:slug>/delete/", views.DeleteNote.as_view(), name="delete-note"),
     path("collection/", views.MyCollection.as_view(), name="my-collection"),
     path(
         "collection/by-me/",

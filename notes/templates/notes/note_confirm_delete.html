@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Note on Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4"><i class="bi-trash"></i> Delete Note</h1>
+<div class="col-lg-9 mx-auto">
+    <div class="alert alert-warning">
+        {% if blocker %}
+            This note cannot be deleted.
+            {% if blocker == 'not-author' %}
+                It is not attributed to you.
+            {% elif blocker == 'other-collectors' %}
+                It is in the collection(s) of other user(s).
+            {% endif %}
+
+            {% if redirect_url %}
+                <div class="mt-2">
+                    <a class="btn btn-secondary" href="{{ redirect_url }}">OK</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <p>Are you sure you want to delete the note below? <strong>This cannot be undone.</strong></p>
+            <form method="post">
+                {% csrf_token %}
+                {{ form }}
+                <input type="hidden" name="redirect_url" value="{{ redirect_url }}">
+                <button class="btn btn-danger" type="submit">
+                    <i class="bi-trash"></i> Confirm
+                </button>
+                {% if redirect_url %}
+                    <a class="btn btn-secondary" href="{{ redirect_url }}">Cancel</a>
+                {% endif %}
+            </form>
+        {% endif %}
+    </div>
+    {% include 'notes/includes/note_card.html' with omit_controls=True %}
+</div>
+{% endblock %}
