@@ -5,7 +5,12 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import BadRequest, ImproperlyConfigured, PermissionDenied
+from django.core.exceptions import (
+    BadRequest,
+    ImproperlyConfigured,
+    ObjectDoesNotExist,
+    PermissionDenied,
+)
 from django.core.paginator import EmptyPage, Paginator
 from django.db import transaction
 from django.http import HttpResponseRedirect
@@ -16,11 +21,12 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, TemplateView
+from django.views.generic.detail import SingleObjectMixin
 
 from formtools.preview import FormPreview
 
 from .forms import NoteForm
-from .models import Collection, Note
+from .models import Collection, Deattribution, Note
 
 UserModel = get_user_model()
 
@@ -186,6 +192,77 @@ class DeleteNote(LoginRequiredMixin, DeleteView):
             # also redirect to a default page.
             redirect_url = reverse("notes:my-collection")
         return redirect_url
+
+
+class RemoveAttribution(SingleObjectMixin, View):
+    slug_field = "code"
+
+    def get_queryset(self):
+        return Note.objects.select_related("author")
+
+    def get(self, request, *args, **kwargs):
+        note = self.get_object()
+        if note.author != self.request.user:
+            raise PermissionDenied
+        return render(
+            request,
+            "notes/note_confirm_remove_attribution.html",
+            {
+                "object": note,
+                "redirect_url": self.request.GET.get("redirect_url", ""),
+            },
+        )
+
+    def post(self, request, *args, **kwargs):
+        note = self.get_object()
+        if note.author != self.request.user:
+            raise PermissionDenied
+
+        with transaction.atomic():
+            Note.objects.filter(pk=note.pk).update(author=None)
+            Deattribution.objects.create(note=note, author=self.request.user)
+
+        msg = (
+            "Attribution removed from note."
+            + f" <a href='{reverse('notes:deattributed-notes')}'>"
+            + "View deattributed notes</a>"
+        )
+        messages.add_message(request, messages.SUCCESS, mark_safe(msg))
+
+        redirect_url = self.request.POST.get("redirect_url")
+        if not redirect_url:
+            redirect_url = note.get_absolute_url()
+        return HttpResponseRedirect(redirect_url)
+
+
+class RestoreAttribution(View):
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise PermissionDenied
+        note = get_object_or_404(Note, code=self.kwargs["slug"])
+        try:
+            deatt = Deattribution.objects.get(note=note, author=self.request.user)
+        except ObjectDoesNotExist as exc:
+            raise BadRequest from exc
+
+        with transaction.atomic():
+            Note.objects.filter(pk=note.pk).update(author=self.request.user)
+            deatt.delete()
+
+        msg = f"Note attribution restored. <a href='{note.get_absolute_url()}'>View note</a>"
+        messages.add_message(request, messages.SUCCESS, mark_safe(msg))
+
+        return HttpResponseRedirect(reverse("notes:deattributed-notes"))
+
+
+class DeattributedNotes(LoginRequiredMixin, GracefulListView):
+    paginate_by = 10
+    template_name = "notes/deattributed.html"
+
+    def get_queryset(self):
+        return Deattribution.objects.filter(author=self.request.user).select_related(
+            "note"
+        )
 
 
 class CollectionAction(LoginRequiredMixin, View):

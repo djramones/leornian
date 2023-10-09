@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Remove Note Attribution on Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4"><i class="bi-person-dash"></i> Remove Attribution</h1>
+<div class="col-lg-9 mx-auto">
+    <div class="alert alert-warning">
+        <p><strong>Are you sure you want to remove your authorship of the note below?</strong></p>
+        <p>You will be able to undo this deattribution only for a limited time, after which the note will be permanently disassociated from your account.</p>
+        <p>If the note is in your collection, it will remain there after attribution is removed.</p>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="redirect_url" value="{{ redirect_url }}">
+            <button class="btn btn-warning" type="submit">
+                <i class="bi-person-dash"></i> Confirm
+            </button>
+            {% if redirect_url %}
+                <a class="btn btn-secondary" href="{{ redirect_url }}">Cancel</a>
+            {% endif %}
+        </form>
+    </div>
+    {% include 'notes/includes/note_card.html' with omit_controls=True %}
+</div>
+{% endblock %}

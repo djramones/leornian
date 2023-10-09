@@ -49,6 +49,18 @@ def note_controls(note, request):
                     "text": "Delete",
                 }
             )
+            # Remove attribution
+            more_controls.append(
+                {
+                    "method": "get",
+                    "action": reverse(
+                        "notes:deattribute",
+                        kwargs={"slug": note.code},
+                    ),
+                    "icon": "person-dash",
+                    "text": "Remove Attribution",
+                }
+            )
 
     return {
         "main_controls": main_controls,

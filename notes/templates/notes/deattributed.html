@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Deattributed Notes on Leornian{% endblock %}
+
+
+{% block content %}
+
+<h1 class="text-center"><i class="bi-person-dash"></i> Deattributed Notes</h1>
+
+{% if object_list %}
+    <div class="text-center">
+        <small class="text-secondary">
+            <p>{{ paginator.count }} note{{ paginator.count|pluralize }}</p>
+        </small>
+        <p>These are the notes from which you have removed your authorship, which you can still restore.</p>
+        <p><a href="{% url 'notes:my-collection' %}">Go to My Collection</a></p>
+    </div>
+{% endif %}
+
+<div class="row">
+    {% for object in object_list %}
+        <div class="col-lg-6 my-3">
+            <div class="card">
+                <div class="card-header">
+                    Deattributed {{ object.created|timesince }} ago
+                </div>
+                <div class="card-body">
+                    {% include 'notes/includes/note_card.html' with object=object.note omit_controls=True %}
+                    <form class="mt-3" method="post" action="{% url 'notes:reattribute' object.note.code %}">
+                        {% csrf_token %}
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi-person-add"></i> Restore Attribution
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="text-center my-3">
+            <p>No deattribution records available.</p>
+            <p><a href="{% url 'notes:my-collection' %}">View My Collection</a></p>
+        </div>
+    {% endfor %}
+</div>
+
+{% include 'notes/includes/pagination.html' %}
+
+{% endblock %}

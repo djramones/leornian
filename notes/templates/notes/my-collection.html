@@ -17,14 +17,24 @@
         <li class="nav-item">
             <a class="nav-link {% if namespace == 'notes' and url_name == 'my-collection-by-others' %}active{% endif %}" href="{% url 'notes:my-collection-by-others' %}">By Others</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link {% if namespace == 'notes' and url_name == 'my-collection-promoted' %}active{% endif %}" href="{% url 'notes:my-collection-promoted' %}">Promoted</a>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">More</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'notes:not-in-collection-by-me' %}">Authored But Not In Collection</a></li>
+                <li><a class="dropdown-item" href="{% url 'notes:my-collection-promoted' %}">Promoted</a></li>
+                <li><a class="dropdown-item" href="{% url 'notes:deattributed-notes' %}">Deattributed</a></li>
+            </ul>
         </li>
     </ul>
 </nav>
 {% if namespace == 'notes' and url_name == 'not-in-collection-by-me' %}
     <div class="alert alert-info text-center">
         These notes are authored by you but are not in your collection.
+    </div>
+{% endif %}
+{% if namespace == 'notes' and url_name == 'my-collection-promoted' %}
+    <div class="alert alert-secondary text-center">
+        These are the notes in your collection that are promoted in <a href="{% url 'notes:drill' %}">Drill</a>.
     </div>
 {% endif %}
 <div class="text-center">
@@ -34,9 +44,6 @@
         {% endif %}
         {% if namespace == 'notes' and url_name == 'my-collection-by-me' %}
             <p>You can also view <a class="link-secondary" href="{% url 'notes:not-in-collection-by-me' %}">notes authored by you but removed from your collection</a>, if any.</p>
-        {% endif %}
-        {% if namespace == 'notes' and url_name == 'my-collection-promoted' %}
-            <p>These are the notes in your collection that are promoted in <a class="link-secondary" href="{% url 'notes:drill' %}">drill</a>.</p>
         {% endif %}
     </small>
 </div>

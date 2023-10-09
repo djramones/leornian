@@ -6,6 +6,16 @@ app_name = "notes"
 urlpatterns = [
     path("new/", views.create_note, name="create-note"),
     path("<slug:slug>/delete/", views.DeleteNote.as_view(), name="delete-note"),
+    path(
+        "<slug:slug>/deattribute/",
+        views.RemoveAttribution.as_view(),
+        name="deattribute",
+    ),
+    path(
+        "<slug:slug>/reattribute/",
+        views.RestoreAttribution.as_view(),
+        name="reattribute",
+    ),
     path("collection/", views.MyCollection.as_view(), name="my-collection"),
     path(
         "collection/by-me/",
@@ -27,6 +37,7 @@ urlpatterns = [
         views.MyCollectionPromoted.as_view(),
         name="my-collection-promoted",
     ),
+    path("deattributed/", views.DeattributedNotes.as_view(), name="deattributed-notes"),
     path("@<username>/", views.NotesByAuthor.as_view(), name="notes-by-username"),
     path("discover/", views.Discover.as_view(), name="discover"),
     path("drill/", views.Drill.as_view(), name="drill"),

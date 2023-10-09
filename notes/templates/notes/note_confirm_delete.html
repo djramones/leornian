@@ -11,7 +11,7 @@
             {% if blocker == 'not-author' %}
                 It is not attributed to you.
             {% elif blocker == 'other-collectors' %}
-                It is in the collection(s) of other user(s).
+                It is in the collection(s) of other user(s). However, you may <a href="{% url 'notes:deattribute' object.code %}?redirect_url={{ object.get_absolute_url }}">remove the attribution of this note to you</a>.
             {% endif %}
 
             {% if redirect_url %}
