@@ -377,10 +377,6 @@ class TemplatesTests(TestCase):
         self.assertInHTML(
             '<a class="nav-link active" href="/collection/by-me/">By Me</a>', out
         )
-        self.assertInHTML(
-            f'<p>You can also view <a class="link-secondary" href="{reverse("notes:not-in-collection-by-me")}">notes authored by you but removed from your collection</a>, if any.</p>',
-            out,
-        )
 
         # notes:not-in-collection-by-me
         req.resolver_match = resolve(reverse("notes:not-in-collection-by-me"))
@@ -389,7 +385,7 @@ class TemplatesTests(TestCase):
             '<a class="nav-link" href="/collection/by-me/">By Me</a>', out
         )
         self.assertInHTML(
-            '<div class="alert alert-info text-center">These notes are authored by you but are not in your collection.</div>',
+            '<div class="alert alert-info text-center">These notes are authored by you but are <strong><em>not saved in your collection</em></strong>.</div>',
             out,
         )
 

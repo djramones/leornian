@@ -29,7 +29,7 @@
 </nav>
 {% if namespace == 'notes' and url_name == 'not-in-collection-by-me' %}
     <div class="alert alert-info text-center">
-        These notes are authored by you but are not in your collection.
+        These notes are authored by you but are <strong><em>not saved in your collection</em></strong>.
     </div>
 {% endif %}
 {% if namespace == 'notes' and url_name == 'my-collection-promoted' %}
@@ -37,17 +37,15 @@
         These are the notes in your collection that are promoted in <a href="{% url 'notes:drill' %}">Drill</a>.
     </div>
 {% endif %}
+{% endwith %}
+
 <div class="text-center">
     <small class="text-secondary">
         {% if paginator.count > 0 %}
             <p>{{ paginator.count }} note{{ paginator.count|pluralize }}</p>
         {% endif %}
-        {% if namespace == 'notes' and url_name == 'my-collection-by-me' %}
-            <p>You can also view <a class="link-secondary" href="{% url 'notes:not-in-collection-by-me' %}">notes authored by you but removed from your collection</a>, if any.</p>
-        {% endif %}
     </small>
 </div>
-{% endwith %}
 
 <div class="row">
     {% for object in object_list %}
@@ -55,7 +53,7 @@
             {% include 'notes/includes/note_card.html' %}
         </div>
     {% empty %}
-        <div class="text-center my-3">No notes available. 🤔</div>
+        <div class="text-center my-3">No notes available.</div>
     {% endfor %}
 </div>
 
