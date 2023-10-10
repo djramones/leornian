@@ -1,10 +1,15 @@
+from io import StringIO
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.db import IntegrityError
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse, resolve, Resolver404
+from django.utils import timezone
 
 from .models import Collection, Deattribution, Note
 from .utils import generate_lorem_ipsum, generate_reference_code
@@ -357,6 +362,32 @@ class ModelsTests(TestCase):
         u2 = UserModel.objects.create_user("juan", "juan@example.com", "1234")
         with self.assertRaises(IntegrityError):
             Deattribution.objects.create(note=note, author=u2)
+
+
+class CommandRemoveOldDeattributionsTests(TestCase):
+    def setUp(self):
+        user = UserModel.objects.create_user("x", "x@example.com", "1234")
+        Deattribution.objects.create(note=Note.objects.create(), author=user)
+        deatt = Deattribution.objects.create(note=Note.objects.create(), author=user)
+        Deattribution.objects.filter(pk=deatt.pk).update(
+            created=timezone.now() - timezone.timedelta(days=5)
+        )
+
+    def test_negative_num_days(self):
+        with self.assertRaises(CommandError):
+            call_command("remove_old_deattributions", "0")
+
+    def test_no_records_for_deletion(self):
+        out = StringIO()
+        call_command("remove_old_deattributions", "10", stdout=out)
+        self.assertIn("0 record(s)", out.getvalue())
+        self.assertEqual(Deattribution.objects.count(), 2)
+
+    def test_deletion(self):
+        out = StringIO()
+        call_command("remove_old_deattributions", "1", stdout=out)
+        self.assertIn("1 record(s)", out.getvalue())
+        self.assertEqual(Deattribution.objects.count(), 1)
 
 
 class TemplatesTests(TestCase):

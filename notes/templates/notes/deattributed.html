@@ -22,7 +22,10 @@
         <div class="col-lg-6 my-3">
             <div class="card">
                 <div class="card-header">
-                    Deattributed {{ object.created|timesince }} ago
+                    Deattributed
+                    <strong title="{{ object.created|date:'d M Y (e)' }}">
+                        {{ object.created|timesince }} ago
+                    </strong>
                 </div>
                 <div class="card-body">
                     {% include 'notes/includes/note_card.html' with object=object.note omit_controls=True %}
