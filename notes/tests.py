@@ -373,7 +373,7 @@ class CommandRemoveOldDeattributionsTests(TestCase):
             created=timezone.now() - timezone.timedelta(days=5)
         )
 
-    def test_negative_num_days(self):
+    def test_invalid_num_days(self):
         with self.assertRaises(CommandError):
             call_command("remove_old_deattributions", "0")
 
