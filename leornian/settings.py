@@ -80,6 +80,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "leornian.context_processors.colormode",
             ],
+            "debug": DEBUG,  # for django-coverage-plugin
         },
     },
 ]
