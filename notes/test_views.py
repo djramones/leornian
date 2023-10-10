@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.views.generic import ListView
 
 from . import views
-from .models import Collection, Note
+from .models import Collection, Deattribution, Note
 
 UserModel = get_user_model()
 
@@ -230,12 +230,19 @@ class ViewsTests(TestCase):
         self.client.login(username="juan", password="1234")
         note = Note.objects.create()
 
-        # With blocker:
+        # With blocker `not-author`:
         res = self.client.get(reverse("notes:delete-note", kwargs={"slug": note.code}))
         self.assertContains(res, "This note cannot be deleted")
 
-        # Without blocker:
+        # With blocker `other-collectors`:
         Note.objects.filter(pk=note.pk).update(author=self.user)
+        u2 = UserModel.objects.create_user("user2", "user2@example.com", "1234")
+        u2.collected_notes.add(note)
+        res = self.client.get(reverse("notes:delete-note", kwargs={"slug": note.code}))
+        self.assertContains(res, "It is in the collection(s) of other user(s)")
+
+        # Without blocker:
+        u2.collected_notes.remove(note)
         res = self.client.get(reverse("notes:delete-note", kwargs={"slug": note.code}))
         self.assertContains(res, "Are you sure you want to delete the note below?")
 
@@ -319,6 +326,117 @@ class ViewsTests(TestCase):
             {"redirect_url": "/foobar/"},
         )
         self.assertEqual(res.url, "/foobar/")
+
+    def test_RemoveAttribution_get_queryset(self):
+        note = Note.objects.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(3):
+            self.client.get(reverse("notes:deattribute", kwargs={"slug": note.code}))
+
+    def test_RemoveAttribution_get(self):
+        # Non-existent note
+        res = self.client.get(reverse("notes:deattribute", kwargs={"slug": "FOOBAR"}))
+        self.assertEqual(res.status_code, 404)
+
+        # Unauthenticated, note has no author
+        note = Note.objects.create()
+        res = self.client.get(reverse("notes:deattribute", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 403)
+
+        # Authenticated, note still has no author
+        self.client.login(username="juan", password="1234")
+        res = self.client.get(reverse("notes:deattribute", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 403)
+
+        # Valid request
+        Note.objects.filter(pk=note.pk).update(author=self.user)
+        res = self.client.get(reverse("notes:deattribute", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 200)
+
+    def test_RemoveAttribution_post(self):
+        # Non-existent note
+        res = self.client.post(reverse("notes:deattribute", kwargs={"slug": "FOOBAR"}))
+        self.assertEqual(res.status_code, 404)
+
+        # Unauthenticated, note has no author
+        note = Note.objects.create()
+        res = self.client.post(reverse("notes:deattribute", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 403)
+
+        # Authenticated, note still has no author
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(reverse("notes:deattribute", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 403)
+
+        # Valid request
+        Note.objects.filter(pk=note.pk).update(author=self.user)
+        res = self.client.post(
+            reverse("notes:deattribute", kwargs={"slug": note.code}), follow=True
+        )
+        self.assertContains(res, "Attribution removed from note")
+        self.assertContains(res, f"<a href='{reverse('notes:deattributed-notes')}'>")
+        note = Note.objects.get(pk=note.pk)
+        self.assertEqual(res.redirect_chain[0][0], note.get_absolute_url())
+        self.assertEqual(note.author, None)
+        self.assertEqual(Deattribution.objects.count(), 1)
+        deatt = Deattribution.objects.all()[0]
+        self.assertEqual(deatt.note.pk, note.pk)
+        self.assertEqual(deatt.author, self.user)
+
+    def test_RemoveAttribution_post_redirect_url(self):
+        note = Note.objects.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse("notes:deattribute", kwargs={"slug": note.code}),
+            {"redirect_url": "/foo/bar/"},
+            follow=True,
+        )
+        self.assertEqual(res.redirect_chain[0][0], "/foo/bar/")
+
+    def test_RestoreAttribution(self):
+        # Unathenticated
+        note = Note.objects.create()
+        res = self.client.post(reverse("notes:reattribute", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 403)
+
+        # Non-existent note code
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(reverse("notes:reattribute", kwargs={"slug": "FOOBAR"}))
+        self.assertEqual(res.status_code, 404)
+
+        # No deattribution record
+        res = self.client.post(reverse("notes:reattribute", kwargs={"slug": note.code}))
+        self.assertEqual(res.status_code, 400)
+
+        # Valid request
+        Deattribution.objects.create(note=note, author=self.user)
+        res = self.client.post(
+            reverse("notes:reattribute", kwargs={"slug": note.code}), follow=True
+        )
+        self.assertContains(
+            res, f"attribution restored. <a href='{note.get_absolute_url()}'>"
+        )
+        self.assertEqual(Note.objects.get(pk=note.pk).author, self.user)
+        self.assertEqual(Deattribution.objects.count(), 0)
+
+    def test_DeattributedNotes_get_queryset(self):
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.DeattributedNotes()
+        view.setup(req)
+
+        for _ in range(3):
+            note = Note.objects.create()
+            Deattribution.objects.create(note=note, author=self.user)
+        u2 = UserModel.objects.create_user("user2", "user2@example.com", "1234")
+        Deattribution.objects.create(note=Note.objects.create(), author=u2)
+        self.assertEqual(len(view.get_queryset()), 3)
+
+        # Test for N+1 queries:
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(4):
+            res = self.client.get(reverse("notes:deattributed-notes"))
+        self.assertEqual(res.status_code, 200)
 
     def test_CollectionAction_action_kwarg(self):
         req = self.factory.post("/test/")

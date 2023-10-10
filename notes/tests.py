@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse, resolve, Resolver404
 
-from .models import Collection, Note
+from .models import Collection, Deattribution, Note
 from .utils import generate_lorem_ipsum, generate_reference_code
 
 UserModel = get_user_model()
@@ -24,6 +24,14 @@ class BasicTests(TestCase):
             reverse("notes:delete-note", kwargs={"slug": self.note.code})
         )
         self.assertEqual(response.status_code, 302)
+        response = self.client.get(
+            reverse("notes:deattribute", kwargs={"slug": self.note.code})
+        )
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(
+            reverse("notes:reattribute", kwargs={"slug": self.note.code})
+        )
+        self.assertEqual(response.status_code, 405)
         response = self.client.get(reverse("notes:my-collection"))
         self.assertEqual(response.status_code, 302)
         response = self.client.get(reverse("notes:my-collection-by-me"))
@@ -33,6 +41,8 @@ class BasicTests(TestCase):
         response = self.client.get(reverse("notes:my-collection-by-others"))
         self.assertEqual(response.status_code, 302)
         response = self.client.get(reverse("notes:my-collection-promoted"))
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse("notes:deattributed-notes"))
         self.assertEqual(response.status_code, 302)
         response = self.client.get(
             reverse("notes:notes-by-username", kwargs={"username": self.user.username})
@@ -70,6 +80,14 @@ class BasicTests(TestCase):
             reverse("notes:delete-note", kwargs={"slug": self.note.code})
         )
         self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            reverse("notes:deattribute", kwargs={"slug": self.note.code})
+        )
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(
+            reverse("notes:reattribute", kwargs={"slug": self.note.code})
+        )
+        self.assertEqual(response.status_code, 405)
         response = self.client.get(reverse("notes:my-collection"))
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse("notes:my-collection-by-me"))
@@ -79,6 +97,8 @@ class BasicTests(TestCase):
         response = self.client.get(reverse("notes:my-collection-by-others"))
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse("notes:my-collection-promoted"))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse("notes:deattributed-notes"))
         self.assertEqual(response.status_code, 200)
         response = self.client.get(
             reverse("notes:notes-by-username", kwargs={"username": self.user.username})
@@ -330,6 +350,14 @@ class ModelsTests(TestCase):
         with self.assertRaises(IntegrityError):
             Collection.objects.create(user=user, note=note)
 
+    def test_deattribution_unique_note(self):
+        note = Note.objects.create()
+        u1 = UserModel.objects.create_user("mary", "mary@example.com", "1234")
+        Deattribution.objects.create(note=note, author=u1)
+        u2 = UserModel.objects.create_user("juan", "juan@example.com", "1234")
+        with self.assertRaises(IntegrityError):
+            Deattribution.objects.create(note=note, author=u2)
+
 
 class TemplatesTests(TestCase):
     def setUp(self):
@@ -377,10 +405,7 @@ class TemplatesTests(TestCase):
         req.resolver_match = resolve(reverse("notes:my-collection-promoted"))
         out = render_to_string("notes/my-collection.html", {"request": req})
         self.assertInHTML(
-            '<a class="nav-link active" href="/collection/promoted/">Promoted</a>', out
-        )
-        self.assertInHTML(
-            f'<p>These are the notes in your collection that are promoted in <a class="link-secondary" href="{reverse("notes:drill")}">drill</a>.</p>',
+            f'<div class="alert alert-secondary text-center">These are the notes in your collection that are promoted in <a href="{reverse("notes:drill")}">Drill</a>.</div>',
             out,
         )
 
@@ -428,6 +453,7 @@ class NoteControlsTemplateTagTests(TestCase):
             "{% load note_controls %}{% note_controls note request %}"
         ).render(Context({"note": self.note, "request": self.request}))
         self.assertIn("Delete", out)
+        self.assertIn("Remove Attribution", out)
         self.assertIn("/test-9ebb5a63/", out)
 
 
