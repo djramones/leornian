@@ -26,6 +26,10 @@ class BasicTests(TestCase):
         response = self.client.get(reverse("notes:create-note"))
         self.assertEqual(response.status_code, 302)
         response = self.client.get(
+            reverse("notes:change-vis", kwargs={"slug": self.note.code})
+        )
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(
             reverse("notes:delete-note", kwargs={"slug": self.note.code})
         )
         self.assertEqual(response.status_code, 302)
@@ -80,6 +84,10 @@ class BasicTests(TestCase):
         self.client.login(username="juan", password="1234")
 
         response = self.client.get(reverse("notes:create-note"))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            reverse("notes:change-vis", kwargs={"slug": self.note.code})
+        )
         self.assertEqual(response.status_code, 200)
         response = self.client.get(
             reverse("notes:delete-note", kwargs={"slug": self.note.code})
@@ -479,6 +487,7 @@ class NoteControlsTemplateTagTests(TestCase):
         out = Template(
             "{% load note_controls %}{% note_controls note request %}"
         ).render(Context({"note": self.note, "request": self.request}))
+        self.assertIn("Change Visibility", out)
         self.assertIn("Delete", out)
         self.assertIn("Remove Attribution", out)
         self.assertIn("/test-9ebb5a63/", out)

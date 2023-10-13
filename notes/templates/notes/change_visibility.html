@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Change Note Visibility | Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4"><i class="bi-eye"></i> Change Visibility</h1>
+<div class="card col-lg-9 mx-auto">
+    <div class="card-body">
+        {% if blocker %}
+            <div class="alert alert-warning">
+                This note’s visibility cannot be changed.
+                {% if blocker == "not-author" %}
+                    This note is not attributed to you.
+                {% elif blocker == "visibility-locked" %}
+                    Its visibility attribute is locked.
+                {% endif %}
+                {% if redirect_url %}
+                    <div class="mt-2">
+                        <a class="btn btn-secondary" href="{{ redirect_url }}">OK</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <form class="card mb-3" method="post">
+                <div class="card-body">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <input type="hidden" name="redirect_url" value="{{ redirect_url }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi-check-circle"></i> Save
+                    </button>
+                    {% if redirect_url %}
+                        <a class="btn btn-secondary" href="{{ redirect_url }}">Cancel</a>
+                    {% endif %}
+                </div>
+            </form>
+        {% endif %}
+        {% include 'notes/includes/note_card.html' with omit_controls=True %}
+    </div>
+</div>
+{% endblock %}

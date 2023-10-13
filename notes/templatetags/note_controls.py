@@ -37,6 +37,18 @@ def note_controls(note, request):
                 }
             )
         if note.author == request.user:
+            # Change visibility
+            more_controls.append(
+                {
+                    "method": "get",
+                    "action": reverse(
+                        "notes:change-vis",
+                        kwargs={"slug": note.code},
+                    ),
+                    "icon": "eye",
+                    "text": "Change Visibility",
+                }
+            )
             # Delete note
             more_controls.append(
                 {

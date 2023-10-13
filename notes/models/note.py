@@ -59,6 +59,7 @@ class Note(models.Model):
     visibility = models.PositiveSmallIntegerField(
         choices=Visibility.choices, default=Visibility.NORMAL
     )
+    visibility_locked = models.BooleanField(default=False)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         blank=True,

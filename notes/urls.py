@@ -5,6 +5,11 @@ from . import views
 app_name = "notes"
 urlpatterns = [
     path("new/", views.create_note, name="create-note"),
+    path(
+        "<slug:slug>/visibility/change/",
+        views.ChangeNoteVisibility.as_view(),
+        name="change-vis",
+    ),
     path("<slug:slug>/delete/", views.DeleteNote.as_view(), name="delete-note"),
     path(
         "<slug:slug>/deattribute/",

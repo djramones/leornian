@@ -225,6 +225,91 @@ class ViewsTests(TestCase):
         res = self.client.get(reverse("notes:single-note", kwargs={"slug": note.code}))
         self.assertEqual(res.status_code, 200)
 
+    def test_ChangeNoteVisibility_template(self):
+        """Test template branches through view call."""
+        self.client.login(username="juan", password="1234")
+        note = Note.objects.create()
+
+        # With blocker `not-author`:
+        res = self.client.get(reverse("notes:change-vis", kwargs={"slug": note.code}))
+        self.assertContains(res, "This note is not attributed to you")
+
+        # With blocker `visibility-locked`:
+        Note.objects.filter(pk=note.pk).update(author=self.user, visibility_locked=True)
+        res = self.client.get(reverse("notes:change-vis", kwargs={"slug": note.code}))
+        self.assertContains(res, "Its visibility attribute is locked")
+
+        # With blocker and redirect_url
+        res = self.client.get(
+            reverse("notes:change-vis", kwargs={"slug": note.code}),
+            {"redirect_url": "/0ef7b2d410f2bba1/"},
+        )
+        self.assertContains(
+            res,
+            '<a class="btn btn-secondary" href="/0ef7b2d410f2bba1/">OK</a>',
+            html=True,
+        )
+
+        # Without blocker:
+        Note.objects.filter(pk=note.pk).update(visibility_locked=False)
+        res = self.client.get(
+            reverse("notes:change-vis", kwargs={"slug": note.code}),
+            {"redirect_url": "/0ef7b2d410f2bba1/"},
+        )
+        self.assertContains(res, '<i class="bi-check-circle"></i> Save')
+
+    def test_ChangeNoteVisibility_get_queryset(self):
+        note = Note.objects.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        with self.assertNumQueries(4):
+            self.client.get(reverse("notes:change-vis", kwargs={"slug": note.code}))
+
+    def test_ChangeNoteVisibility_blocker(self):
+        note = Note.objects.create()
+        req = self.factory.get("/test/")
+        req.user = self.user
+        view = views.ChangeNoteVisibility()
+        view.setup(req, slug=note.code)
+        self.assertEqual(view.blocker(), "not-author")
+
+        Note.objects.filter(pk=note.pk).update(author=self.user, visibility_locked=True)
+        self.assertEqual(view.blocker(), "visibility-locked")
+
+        Note.objects.filter(pk=note.pk).update(visibility_locked=False)
+        self.assertEqual(view.blocker(), None)
+
+    def test_ChangeNoteVisibility_post(self):
+        note = Note.objects.create(visibility=Note.Visibility.NORMAL)
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse("notes:change-vis", kwargs={"slug": note.code}),
+            {"visibility": Note.Visibility.UNLISTED},
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(
+            Note.objects.get(pk=note.pk).visibility, Note.Visibility.NORMAL
+        )
+
+        Note.objects.filter(pk=note.pk).update(author=self.user)
+        res = self.client.post(
+            reverse("notes:change-vis", kwargs={"slug": note.code}),
+            {"visibility": Note.Visibility.UNLISTED},
+        )
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(
+            Note.objects.get(pk=note.pk).visibility, Note.Visibility.UNLISTED
+        )
+
+    def test_ChangeNoteVisibility_get_success_url(self):
+        # No redirect_url supplied:
+        note = Note.objects.create(author=self.user)
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(
+            reverse("notes:change-vis", kwargs={"slug": note.code}),
+            {"visibility": Note.Visibility.UNLISTED},
+        )
+        self.assertEqual(res.url, note.get_absolute_url())
+
     def test_DeleteNote_confirm_delete_template(self):
         """Test template branches through view call."""
         self.client.login(username="juan", password="1234")

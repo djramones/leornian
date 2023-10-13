@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import (
     BadRequest,
     ImproperlyConfigured,
@@ -20,7 +21,13 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.safestring import mark_safe
 from django.views import View
-from django.views.generic import DeleteView, DetailView, ListView, TemplateView
+from django.views.generic import (
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 from django.views.generic.detail import SingleObjectMixin
 
 from formtools.preview import FormPreview
@@ -137,6 +144,46 @@ class SingleNote(DetailView):
 
     def get_queryset(self):
         return super().get_queryset().annotate_for_controls(self.request.user)
+
+
+class ChangeNoteVisibility(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = Note
+    slug_field = "code"
+    fields = ["visibility"]
+    template_name = "notes/change_visibility.html"
+    success_message = "Note visibility updated."
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("author")
+
+    def blocker(self):
+        note = self.get_object()
+        if note.author != self.request.user:
+            return "not-author"
+        if note.visibility_locked:
+            return "visibility-locked"
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "blocker": self.blocker(),
+                "redirect_url": self.request.GET.get("redirect_url", ""),
+            }
+        )
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if blocker := self.blocker():
+            raise BadRequest("Deletion blocker: " + blocker)
+        return super().post(request, *args, **kwargs)
+
+    def get_success_url(self):
+        redirect_url = self.request.POST.get("redirect_url")
+        if not redirect_url:
+            redirect_url = self.object.get_absolute_url()
+        return redirect_url
 
 
 class DeleteNote(LoginRequiredMixin, DeleteView):
