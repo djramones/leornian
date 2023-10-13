@@ -1,8 +1,11 @@
 from django.views.generic import TemplateView
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django_registration.backends.activation.views import RegistrationView as DjRegView
 
 from notes.views import Start
+
+from . import forms as site_forms
 
 
 def home(request):
@@ -26,3 +29,7 @@ def messages_test(request):
     if "next" in request.GET:
         return HttpResponseRedirect(request.GET["next"])
     return HttpResponseRedirect("/")
+
+
+class RegistrationView(DjRegView):
+    form_class = site_forms.RegistrationForm

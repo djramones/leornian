@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Sign Up | Leornian{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+    <div class="alert alert-info text-center">
+        <strong>Note</strong>: you are currently logged in as {{ user.username }}.
+    </div>
+{% endif %}
+
+<div class="card col-lg-6 mx-auto">
+    <div class="card-header"><strong>Sign up for an account</strong></div>
+    <div class="card-body">
+        <form class="mb-2" method="post" action="{% url 'leornian-register' %}">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button class="btn btn-primary" type="submit">
+                <i class="bi-arrow-right-square"></i> Sign Up
+            </button>
+        </form>
+    </div>
+</div>
+
+{% if not user.is_authenticated %}
+    <div class="text-center my-3">
+        Already have an account? <a href="{% url 'login' %}">Log in</a>
+    </div>
+{% endif %}
+
+{% endblock %}

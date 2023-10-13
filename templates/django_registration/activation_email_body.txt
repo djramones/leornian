@@ -1,0 +1,9 @@
+An account with the username `{{ user.username }}` has been registered using this email address at Leornian ({{ site.domain }}).
+
+If this was you, please visit the following link to activate your account:
+
+{{ scheme }}://{{ site }}{% url 'django_registration_activate' activation_key %}
+
+This activation link is valid for {{ expiration_days }} day{{ expiration_days|pluralize }}.
+
+If you were not expecting this, please ignore this email. Someone may have accidentally entered your email address in our sign up form. Even if it was deliberate, this does not necessarily mean your email account has been compromised, although you might want to review your security settings to ensure your account remains safe.

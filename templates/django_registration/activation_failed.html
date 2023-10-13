@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Account Activation Error | Leornian{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center mb-5">
+    <i class="bi-x-octagon"></i> Account Activation Error
+</h1>
+
+{% if activation_error.code == "already_activated" %}
+    {# See: https://github.com/ubernostrum/django-registration/issues/242 #}
+    <div class="alert alert-warning text-center">
+        {{ activation_error.message }}
+        <br><br>
+        This could be because the activation link was preprocessed (crawled) by your email service provider.
+        <br><br>
+        You may already <a href="{% url 'login' %}">log in</a> to your account. 
+    </div>
+{% else %}
+    <div class="alert alert-danger text-center">
+        {{ activation_error.message }}
+    </div>
+{% endif %}
+
+{% endblock %}

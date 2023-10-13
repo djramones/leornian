@@ -16,6 +16,7 @@
 {% endif %}
 
 <div class="card col-lg-6 mx-auto">
+    <div class="card-header"><strong>Log in to your account</strong></div>
     <div class="card-body">
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
@@ -31,5 +32,9 @@
         </a>
     </div>
 </div>
+
+{% if not user.is_authenticated %}
+    <div class="text-center my-3">No account yet? <a href="{% url 'leornian-register' %}">Sign up</a></div>
+{% endif %}
 
 {% endblock %}

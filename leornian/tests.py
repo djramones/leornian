@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user, get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.core import mail
 from django.core.handlers.asgi import ASGIHandler
 from django.core.handlers.wsgi import WSGIHandler
 from django.template.loader import render_to_string
@@ -7,6 +8,7 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse, resolve
 
 from . import context_processors as ctx_procs
+from . import forms as site_forms
 
 UserModel = get_user_model()
 
@@ -162,6 +164,75 @@ class URLsTests(TestCase):
 
         # django.contrib.admin integration
         self.assertEqual(resolve("/admin/login/").view_name, "admin:login")
+
+
+class DjangoRegistrationTests(TestCase):
+    def test_template_smoke_tests(self):
+        res = self.client.get(reverse("leornian-register"))
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "django_registration/registration_form.html")
+
+        res = self.client.get(reverse("django_registration_complete"))
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "django_registration/registration_complete.html")
+
+        res = self.client.get(reverse("django_registration_disallowed"))
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "django_registration/registration_closed.html")
+
+        res = self.client.get(
+            reverse("django_registration_activate", kwargs={"activation_key": "foobar"})
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "django_registration/activation_failed.html")
+
+        res = self.client.get(reverse("django_registration_activation_complete"))
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "django_registration/activation_complete.html")
+
+    def test_register_url_override(self):
+        """
+        Test that even if the overridden URL name is used, reverse() resolves
+        to our custom view.
+        """
+        resolver_match = resolve(reverse("django_registration_register"))
+        self.assertEqual(resolver_match.view_name, "leornian-register")
+
+    def test_reg_form_custom_help_text_display(self):
+        """Test display of the custom help text."""
+        res = self.client.get(reverse("leornian-register"))
+        self.assertContains(res, "Can contain letters, digits, hyphens")
+
+    def test_reg_form_other_help_text_display(self):
+        """Test display of the other (uncustomized) help texts."""
+        res = self.client.get(reverse("leornian-register"))
+        self.assertContains(res, "Enter the same password as before")
+
+    def test_reg_form_help_text_validity(self):
+        """Test if the custom help text is accurate."""
+        form = site_forms.RegistrationForm(
+            {
+                "username": "a0-_.+",
+                "email": "foo@example.com",
+                "password1": "whz64rh7wu23wwec",
+                "password2": "whz64rh7wu23wwec",
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_rendered_activation_email_template(self):
+        self.client.post(
+            reverse("leornian-register"),
+            {
+                "username": "foo_user",
+                "email": "foo@example.com",
+                "password1": "whz64rh7wu23wwec",
+                "password2": "whz64rh7wu23wwec",
+            },
+        )
+        msg = mail.outbox[0].body
+        self.assertIn("Leornian (testserver)", msg)
+        self.assertIn("http://testserver/accounts/activate/", msg)
 
 
 class ContextProcessorsTests(TestCase):

@@ -14,6 +14,13 @@ admin.site.site_header = admin.site.site_title = "Leornian admin"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        # django-registration override
+        "accounts/register/",
+        site_views.RegistrationView.as_view(),
+        name="leornian-register",
+    ),
+    path("accounts/", include("django_registration.backends.activation.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path(
         "accounts/me/",

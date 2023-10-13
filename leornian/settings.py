@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "formtools",
+    "django_registration",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -116,6 +117,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 LOGIN_REDIRECT_URL = LOGOUT_REDIRECT_URL = "home"
+
+# django-registration:
+ACCOUNT_ACTIVATION_DAYS = 7
+REGISTRATION_OPEN = env.bool("LEOR_REG_OPEN")
 
 
 # Internationalization
