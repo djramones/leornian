@@ -367,15 +367,21 @@ class Drill(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         if promote_code := request.POST.get("promote"):
             # Make sure to filter by user to prevent modifying other users' data
-            Collection.objects.filter(
+            updated = Collection.objects.filter(
                 note__code=promote_code, user=request.user
             ).update(promoted=True)
-            messages.add_message(request, messages.SUCCESS, "A note has been promoted.")
+            if updated > 0:
+                messages.add_message(
+                    request, messages.SUCCESS, "A note has been promoted."
+                )
         if demote_code := request.POST.get("demote"):
-            Collection.objects.filter(note__code=demote_code, user=request.user).update(
-                promoted=False
-            )
-            messages.add_message(request, messages.SUCCESS, "A note has been demoted.")
+            updated = Collection.objects.filter(
+                note__code=demote_code, user=request.user
+            ).update(promoted=False)
+            if updated > 0:
+                messages.add_message(
+                    request, messages.SUCCESS, "A note has been demoted."
+                )
 
         values = (
             Collection.objects.filter(user=request.user)

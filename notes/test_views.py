@@ -615,6 +615,16 @@ class ViewsTests(TestCase):
             Collection.objects.get(note=note, user=self.user).promoted, False
         )
 
+    def test_Drill_invalid_promote_code(self):
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(reverse("notes:drill"), {"promote": "foo1234"})
+        self.assertNotContains(res, "A note has been promoted")
+
+    def test_Drill_invalid_demote_code(self):
+        self.client.login(username="juan", password="1234")
+        res = self.client.post(reverse("notes:drill"), {"demote": "foo1234"})
+        self.assertNotContains(res, "A note has been demoted")
+
     def test_Drill_insufficient_collection(self):
         self.client.login(username="juan", password="1234")
         res = self.client.post(reverse("notes:drill"))
