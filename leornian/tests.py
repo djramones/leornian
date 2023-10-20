@@ -104,8 +104,13 @@ class TemplatesTests(TestCase):
         # Authenticated: home
         req.resolver_match = resolve(reverse("home"))
         out = render_to_string("base.html", {"request": req, "user": user})
+        self.assertIn("Start", out)
+
+        # Unauthenticated: help
+        req.resolver_match = resolve(reverse("help"))
+        out = render_to_string("base.html", {"request": req, "user": anon})
         self.assertInHTML(
-            f'<a class="nav-link active" href="{reverse("home")}">Start</a>', out
+            f'<a class="nav-link active" href="{reverse("help")}">Help</a>', out
         )
 
         # Authenticated: notes:create-note
@@ -147,10 +152,10 @@ class TemplatesTests(TestCase):
         """
         UserModel.objects.create_user("mary", "mary@example.com", "1234")
         self.client.login(username="mary", password="1234")
-        res = self.client.get(reverse("home"))
+        res = self.client.get(reverse("notes:create-note"))
         self.assertContains(
             res,
-            f'<a class="nav-link active" href="{reverse("home")}">Start</a>',
+            f'<a class="nav-link icon-link active" href="{reverse("notes:create-note")}"><i class="bi-file-earmark-plus"></i><span class="d-none d-lg-block">New Note</span></a>',
             html=True,
         )
 

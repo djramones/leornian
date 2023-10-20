@@ -19,15 +19,40 @@
                     </a>
                 </li>
                 {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link {% if url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Start</a>
-                </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Start</a>
+                        <ul class="dropdown-menu shadow">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'home' %}">
+                                    <i class="bi-house"></i> Home
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'notes:discover' %}">
+                                    <i class="bi-binoculars"></i> Discover
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'notes:drill' %}">
+                                    <i class="bi-arrow-repeat"></i> Drill
+                                </a>
+                            </li>
+                            {% if user.is_staff %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'support:message-list' %}">
+                                        Support Messages
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
                 {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="#">About</a>
                 </li>
                 <li class="nav-item me-auto">
-                    <a class="nav-link" href="{% url 'help' %}">Help</a>
+                    <a class="nav-link {% if url_name == 'help' %}active{% endif %}" href="{% url 'help' %}">Help</a>
                 </li>
 
                 {% if user.is_authenticated %}
