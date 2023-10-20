@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Help | Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-5"><i class="bi-question-circle"></i> Help</h1>
+<div class="card col-lg-9 mx-auto">
+    <div class="card-body">
+        <h2>Documentation</h2>
+        <p>This project’s GitHub Wiki serves as its primary documentation site; please browse the pages there first for any questions you may have.</p>
+        <a class="btn btn-primary" href="https://github.com/djramones/leornian/wiki">
+            View Wiki <i class="bi-box-arrow-up-right"></i>
+        </a>
+        <hr>
+
+        <h2>Forum</h2>
+        <p>If the project Wiki does not address your concern, you may also browse or search the project’s GitHub Discussions site. Feel free to post a question or start a discussion thread there; it is the best channel for any feedback you may have for the project.</p>
+        <a class="btn btn-primary" href="https://github.com/djramones/leornian/discussions">
+            View Discussions <i class="bi-box-arrow-up-right"></i>
+        </a>
+        <hr>
+
+        <h2>Reports</h2>
+        <p>If you have an issue regarding specific content or accounts on the site, please use the ‘Report’ links that should be available on the corresponding content/account pages.</p>
+        <hr>
+
+        <h2>Support</h2>
+        <p>As a <strong>last resort</strong>, you may use the support contact form to send a message directly to the site admin. This may be necessary if your concern requires privacy (but is not related to content moderation). It is strongly recommended that you use the Discussions site if possible, so that other users might benefit from answers or responses to your question or concern.</p>
+        <a class="btn btn-primary" href="{% url 'support:contact' %}">
+            <i class="bi-envelope"></i> Contact Support
+        </a>
+    </div>
+</div>
+{% endblock %}

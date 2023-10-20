@@ -32,6 +32,7 @@ DATABASES = {
 
 INSTALLED_APPS = [
     "notes.apps.NotesConfig",
+    "support.apps.SupportConfig",
     "crispy_forms",
     "crispy_bootstrap5",
     "formtools",
@@ -143,6 +144,7 @@ STATIC_URL = "static/"
 DEFAULT_FROM_EMAIL = env("LEOR_DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = env("LEOR_SERVER_EMAIL")
 ADMINS = list(parseaddr(email) for email in env("LEOR_ADMINS").split(","))
+EMAIL_SUBJECT_PREFIX = "[Leornian] "
 if env.bool("LEOR_EMAIL_LOCAL_DEV"):
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:

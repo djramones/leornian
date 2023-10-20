@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Send Support Message | Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4">Send Support Message</h1>
+
+<div class="card col-lg-9 mx-auto">
+    <div class="card-body">
+        <form method="post" action="">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="text-center">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi-send"></i> Send
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="text-center mt-5">
+    <a class="btn btn-primary" href="{% url 'support:message-list' %}">
+        <i class="bi-list"></i> Messages List
+    </a>
+</div>
+
+{% endblock %}

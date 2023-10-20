@@ -25,6 +25,10 @@ class BasicTests(TestCase):
         response = self.client.get("/accounts/me/")
         self.assertRedirects(response, "/accounts/login/?next=/accounts/me/")
 
+        # help
+        response = self.client.get("/help/")
+        self.assertEqual(response.status_code, 200)
+
         # Admin views
         response = self.client.get("/admin/")
         self.assertRedirects(response, "/admin/login/?next=/admin/")

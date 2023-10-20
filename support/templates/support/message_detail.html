@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Support Message | Leornian{% endblock %}
+
+{% block content %}
+<div class="card col-lg-9 mx-auto">
+    <div class="card-header">
+        <strong>From</strong>:
+        {% if object.from_user %}
+            {{ object.from_user }}
+            {% if object.from_user.email %}
+                &lt;{{ object.from_user.email }}&gt;
+            {% endif %}
+        {% else %}
+            <i class="text-secondary">(Anonymous)</i>
+        {% endif %}
+
+        <br>
+
+        <strong>To</strong>:
+        {% if object.to_email %}
+            {{ object.to_email }}
+        {% else %}
+            <i class="text-secondary">(Support)</i>
+        {% endif %}
+
+        <br>
+
+        <i class="bi-clock"></i>
+        <time datetime="{{ object.created|date:'c' }}">
+            {{ object.created|date:"r" }}
+        </time>
+    </div>
+    <article class="card-body">
+        <strong>{{ object.subject }}</strong>
+        <hr>
+        {{ object.message|linebreaksbr }}
+    </article>
+</div>
+
+<div class="text-center mt-5">
+    <a class="btn btn-primary" href="{% url 'support:send-support-message' %}">
+        <i class="bi-envelope"></i> Send Message
+    </a>
+    &nbsp;
+    <a class="btn btn-primary" href="{% url 'support:message-list' %}">
+        <i class="bi-list"></i> Messages List
+    </a>
+</div>
+{% endblock %}

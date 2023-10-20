@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Contact Support | Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4"><i class="bi-envelope"></i> Contact Support</h1>
+
+{% if not user.is_authenticated %}
+    <div class="alert alert-info">
+        If you have an account and are able to <a href="{% url 'login' %}?next={% filter urlencode %}{% url 'support:contact' %}{% endfilter %}">log in</a>, please do so before submitting a message. Otherwise, please indicate your email address and your name or username in your message. We might be unable to help if we have no way to identify or contact you.
+    </div>
+{% endif %}
+
+<form method="post" action="">
+    <div class="card col-lg-9 mx-auto">
+        <div class="card-body">
+            {% csrf_token %}
+            {{ form|crispy }}
+        </div>
+    </div>
+    <div class="text-center mt-3">
+        <button class="btn btn-primary" type="submit">
+            <i class="bi-send"></i> Submit
+        </button>
+    </div>
+</form>
+
+{% endblock %}

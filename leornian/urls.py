@@ -27,6 +27,8 @@ urlpatterns = [
         login_required(TemplateView.as_view(template_name="my-account.html")),
         name="my-account",
     ),
+    path("help/", TemplateView.as_view(template_name="help.html"), name="help"),
+    path("support/", include("support.urls")),
     path("", include("notes.urls")),
     path("", site_views.home, name="home"),
 ]
