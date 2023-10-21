@@ -17,6 +17,10 @@
         <form class="mb-2" method="post" action="{% url 'leornian-register' %}">
             {% csrf_token %}
             {{ form|crispy }}
+            <div class="my-3">
+                <div class="h-captcha" data-sitekey="{{ captcha_site_key }}" {% if colormode %}data-theme="{{ colormode }}"{% endif %}></div>
+                <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+            </div>
             <button class="btn btn-primary" type="submit">
                 <i class="bi-arrow-right-square"></i> Sign Up
             </button>

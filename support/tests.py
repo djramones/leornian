@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import RequestFactory, TestCase
@@ -26,9 +28,18 @@ class ContactSupportTests(TestCase):
         res = self.client.get(reverse("support:contact"))
         self.assertEqual(res.status_code, 200)
 
-    def test_submit_as_anonymous_user(self):
+    @patch("leornian_helpers.mixins._verify_form_captcha")
+    def test_submit_as_anonymous_user(self, mock_verify_captcha):
+        # Mock _verify_form_captcha to simply return the form object passed
+        # to it, to skip the external verification request:
+        mock_verify_captcha.side_effect = lambda *args: args[1]
         res = self.client.post(
-            reverse("support:contact"), {"subject": "Foo", "message": "Bar."}
+            reverse("support:contact"),
+            {
+                "subject": "Foo",
+                "message": "Bar.",
+                "h-captcha-response": "10000000-aaaa-bbbb-cccc-000000000001",
+            },
         )
         self.assertEqual(res.status_code, 302)
         self.assertEqual(Message.objects.count(), 1)

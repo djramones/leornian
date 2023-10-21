@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django_registration.backends.activation.views import RegistrationView as DjRegView
 
+from leornian_helpers.mixins import CaptchaFormMixin
 from notes.views import Start
 
 from . import forms as site_forms
@@ -31,5 +32,5 @@ def messages_test(request):
     return HttpResponseRedirect("/")
 
 
-class RegistrationView(DjRegView):
+class RegistrationView(CaptchaFormMixin, DjRegView):
     form_class = site_forms.RegistrationForm

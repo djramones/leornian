@@ -5,6 +5,8 @@ from django.core.mail import mail_admins, send_mail
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
+from leornian_helpers.mixins import CaptchaFormMixin
+
 from .models import Message
 
 
@@ -16,13 +18,12 @@ def get_message_url(request, message):
     return url
 
 
-class ContactSupport(CreateView):
+class ContactSupport(CaptchaFormMixin, CreateView):
     model = Message
     fields = ["subject", "message"]
     template_name = "support/contact_support.html"
     success_url = reverse_lazy("support:contact-done")
-
-    # TODO: add captcha protection if not authenticated
+    captcha_for_anon_only = True
 
     def form_valid(self, form):
         if self.request.user.is_authenticated:

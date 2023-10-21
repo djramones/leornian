@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user, get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
@@ -229,7 +231,11 @@ class DjangoRegistrationTests(TestCase):
         )
         self.assertTrue(form.is_valid())
 
-    def test_rendered_activation_email_template(self):
+    @patch("leornian_helpers.mixins._verify_form_captcha")
+    def test_rendered_activation_email_template(self, mock_verify_captcha):
+        # Mock _verify_form_captcha to simply return the form object passed
+        # to it, to skip the external verification request:
+        mock_verify_captcha.side_effect = lambda *args: args[1]
         self.client.post(
             reverse("leornian-register"),
             {
@@ -237,8 +243,10 @@ class DjangoRegistrationTests(TestCase):
                 "email": "foo@example.com",
                 "password1": "whz64rh7wu23wwec",
                 "password2": "whz64rh7wu23wwec",
+                "h-captcha-response": "10000000-aaaa-bbbb-cccc-000000000001",
             },
         )
+        self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0].body
         self.assertIn("Leornian (testserver)", msg)
         self.assertIn("http://testserver/accounts/activate/", msg)
