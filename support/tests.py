@@ -2,22 +2,13 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core import mail
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 from .models import Message
-from . import views
 
 
 UserModel = get_user_model()
-
-
-class GetMessageURLTests(TestCase):
-    def test_get_message_url_function(self):
-        req = RequestFactory().get("/test/")
-        message = Message.objects.create(subject="Foo", message="Bar")
-        url = views.get_message_url(req, message)
-        self.assertEqual(url, "http://testserver" + message.get_absolute_url())
 
 
 class ContactSupportTests(TestCase):

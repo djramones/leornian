@@ -1,5 +1,5 @@
 import logging
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import requests
 from django import forms
@@ -9,6 +9,7 @@ from django.test import RequestFactory, TestCase
 from django.views.generic import FormView
 
 from .mixins import CAPTCHA_FORM_RESPONSE_NAME, CaptchaFormMixin, _verify_form_captcha
+from .utils import get_object_url
 
 UserModel = get_user_model()
 
@@ -118,3 +119,12 @@ class CaptchaFormMixinTests(TestCase):
 
     def test_get_form_return(self):
         self.assertIsInstance(self.view.get_form(), DummyForm)
+
+
+class GetObjectURLTests(TestCase):
+    def test_get_object_url_function(self):
+        req = RequestFactory().get("/test/")
+        obj = Mock()
+        obj.get_absolute_url.return_value = "/foobar/"
+        url = get_object_url(req, obj)
+        self.assertEqual(url, "http://testserver/foobar/")

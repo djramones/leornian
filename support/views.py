@@ -1,21 +1,13 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import mail_admins, send_mail
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
 from leornian_helpers.mixins import CaptchaFormMixin
+from leornian_helpers.utils import get_object_url
 
 from .models import Message
-
-
-def get_message_url(request, message):
-    """Get the complete URL for a message, including the scheme and domain."""
-    url = "https" if request.is_secure() else "http"
-    url += "://" + str(get_current_site(request))
-    url += message.get_absolute_url()
-    return url
 
 
 class ContactSupport(CaptchaFormMixin, CreateView):
@@ -32,7 +24,7 @@ class ContactSupport(CaptchaFormMixin, CreateView):
         mail_admins(
             "New message from support contact form",
             "A message has been submitted through the support contact form:\n\n"
-            + get_message_url(self.request, self.object),
+            + get_object_url(self.request, self.object),
         )
         return response
 
