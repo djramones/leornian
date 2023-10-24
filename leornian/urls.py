@@ -29,6 +29,7 @@ urlpatterns = [
     ),
     path("help/", TemplateView.as_view(template_name="help.html"), name="help"),
     path("support/", include("support.urls")),
+    path("moderation/", include("moderation.urls")),
     path("", include("notes.urls")),
     path("", site_views.home, name="home"),
 ]

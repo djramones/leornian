@@ -6,13 +6,16 @@
 <h1 class="text-center">
     <i class="bi-journal-text"></i> Notes by {{ author.username }}
 </h1>
-{% if paginator.count > 0 %}
-    <div class="mt-3 mb-4 text-center">
-        <small class="text-secondary">
-            {{ paginator.count }} note{{ paginator.count|pluralize }}
-        </small>
-    </div>
-{% endif %}
+<div class="mt-3 mb-4 text-center">
+    <small class="text-secondary">
+        {% if paginator.count > 0 %}
+            <p>{{ paginator.count }} note{{ paginator.count|pluralize }}</p>
+        {% endif %}
+        <a class="icon-link link-secondary" href="{% url 'moderation:submit-report' 'user' author.username %}">
+            <i class="bi-flag"></i> Report Account
+        </a>
+    </small>
+</div>
 <div class="row">
     {% for object in object_list %}
         <div class="col-lg-6 my-3">

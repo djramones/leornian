@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Content &amp; Account Reports | Leornian{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center mb-4">
+    <i class="bi-flag"></i> Content &amp; Account Reports
+</h1>
+
+{% if object_list %}
+    <div class="table-responsive">
+        <table class="table text-nowrap">
+            <thead>
+                <tr>
+                    <th scope="col">Report</th>
+                    <th scope="col">Reported Item</th>
+                    <th scope="col"><i class="bi-clock"></i> Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for object in object_list %}
+                    <tr>
+                        <td>
+                            <a class="icon-link" href="{% url 'moderation:report' object.code %}">
+                                <i class="bi-file-text"></i>
+                                <span class="font-monospace">{{ object }}</span>
+                            </a>
+                        </td>
+                        <td>
+                            {% if object.content_object.get_absolute_url %}
+                                <a href="{{ object.content_object.get_absolute_url }}">
+                                    {{ object.content_type.name|capfirst }}
+                                    {{ object.content_object|truncatechars:15 }}
+                                </a>
+                            {% else %}
+                                {{ object.content_type.name|capfirst }}
+                                <i class="text-secondary">(link unavailable)</i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <time datetime="{{ object.created|date:'c' }}" title="{{ object.created|date:'r' }}">
+                                {{ object.created|date:"M d Y H:i e" }}
+                            </time>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center">
+        {% if not user.is_staff %}
+            Reports you submit will appear here.
+        {% else %}
+            No reports available.
+        {% endif %}
+    </div>
+{% endif %}
+
+{% include 'notes/includes/pagination.html' %}
+
+{% endblock %}

@@ -33,6 +33,7 @@ DATABASES = {
 INSTALLED_APPS = [
     "notes.apps.NotesConfig",
     "support.apps.SupportConfig",
+    "moderation.apps.ModerationConfig",
     "crispy_forms",
     "crispy_bootstrap5",
     "formtools",
@@ -54,6 +55,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 ROOT_URLCONF = "leornian.urls"
+ABSOLUTE_URL_OVERRIDES = {
+    "auth.user": lambda o: f"/@{o.username}/",
+}
 WSGI_APPLICATION = "leornian.wsgi.application"
 
 if DEBUG:

@@ -176,6 +176,11 @@ class URLsTests(TestCase):
         # django.contrib.admin integration
         self.assertEqual(resolve("/admin/login/").view_name, "admin:login")
 
+    def test_user_model_absolute_url(self):
+        """Test the User absolute URL as set in ABSOLUTE_URL_OVERRIDES."""
+        u = UserModel.objects.create_user("u", "u@example.com", "123")
+        self.assertEqual(u.get_absolute_url(), "/@u/")
+
 
 class DjangoRegistrationTests(TestCase):
     def test_template_smoke_tests(self):

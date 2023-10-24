@@ -73,6 +73,19 @@ def note_controls(note, request):
                     "text": "Remove Attribution",
                 }
             )
+        else:
+            # Report content
+            more_controls.append(
+                {
+                    "method": "get",
+                    "action": reverse(
+                        "moderation:submit-report",
+                        kwargs={"type": "note", "id": note.code},
+                    ),
+                    "icon": "flag",
+                    "text": "Report Content",
+                }
+            )
 
     return {
         "main_controls": main_controls,

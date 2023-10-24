@@ -468,6 +468,7 @@ class NoteControlsTemplateTagTests(TestCase):
         self.assertIn("Unsave", out)
         self.assertIn("/test-9ebb5a63/", out)
         self.assertNotIn("Save", out)
+        self.assertIn("Report Content", out)
 
     def test_note_controls_authenticated_unsaved(self):
         self.note.saved = False
@@ -478,6 +479,7 @@ class NoteControlsTemplateTagTests(TestCase):
         self.assertIn("Save", out)
         self.assertIn("/test-9ebb5a63/", out)
         self.assertNotIn("Unsave", out)
+        self.assertIn("Report Content", out)
 
     def test_note_controls_authenticated_user_is_note_author(self):
         Note.objects.filter(pk=self.note.pk).update(author=self.user)

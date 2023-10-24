@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Report {{ view.report.code }} on Leornian{% endblock %}
+
+
+{% block content %}
+
+<h1 class="text-center">
+    <i class="bi-flag"></i> Report
+    <span class="font-monospace">{{ view.report.code }}</span>
+</h1>
+<div class="card col-lg-9 mx-auto my-4">
+    <div class="card-header">
+        <div class="d-flex flex-wrap gap-2 column-gap-3 my-2">
+            <span>
+                <strong>Reported Item</strong>:
+                {% if view.report.content_object.get_absolute_url %}
+                    <a class="icon-link" href="{{ view.report.content_object.get_absolute_url }}">
+                        {{ view.report.content_object|truncatechars:15 }}
+                    </a>
+                {% else %}
+                    <i class="text-secondary">unavailable; may have been deleted</i>
+                {% endif %}
+            </span>
+            <span>
+                <strong>Item Type</strong>: {{ view.report.content_type.name }}
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        {{ view.report.message|linebreaksbr }}
+    </div>
+    <div class="card-footer">
+        <div class="d-flex flex-wrap gap-2 column-gap-3 my-2">
+            <span>
+                <i class="bi-person"></i> <strong>Reporter</strong>:
+                {% if view.report.reporter %}
+                    {{ view.report.reporter.username }}
+                {% else %}
+                    <i class="text-secondary">unavailable</i>
+                {% endif %}
+            </span>
+            <span>
+                <i class="bi-clock"></i> <strong>Submitted</strong>:
+                <time datetime="{{ view.report.created|date:'c' }}" title="{{ view.report.created|date:'r' }}">
+                    {{ view.report.created|date:"M d Y H:i e" }}
+                </time>
+            </span>
+        </div>
+    </div>
+</div>
+
+
+
+<h2 class="text-center mt-5 mb-3">Responses</h2>
+{% if paginator.count > 0 %}
+    <div class="my-3 text-center">
+        <small class="text-secondary">
+            {{ paginator.count }} response{{ paginator.count|pluralize }}
+        </small>
+    </div>
+{% endif %}
+{% if page_obj.has_previous %}
+    <nav class="my-3">
+        <ul class="list-group list-group-horizontal justify-content-center">
+            <li class="list-group-item">
+                <a class="icon-link" href="?page=1">
+                    <i class="bi-chevron-bar-left"></i> First
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a class="icon-link" href="?page={{ page_obj.previous_page_number }}">
+                    <i class="bi-chevron-left"></i> Previous
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="text-center my-2"><i class="bi-arrow-down"></i></div>
+{% endif %}
+{% for object in object_list %}
+    {% if not forloop.first %}
+        <div class="text-center my-2"><i class="bi-arrow-down"></i></div>
+    {% endif %}
+    <div class="card col-lg-9 mx-auto">
+        {% if view.report.reporter and view.report.reporter == object.actor %}
+            <div class="card-header text-bg-secondary">From reporter</div>
+        {% endif %}
+        <div class="card-body">
+            {{ object.message|linebreaksbr }}
+        </div>
+        <div class="card-footer">
+            <div class="d-flex flex-wrap gap-2 column-gap-3 my-1">
+                {# We avoid revealing the response actor to non-staff: #}
+                {% if object.actor and user.is_staff or object.actor and object.actor == user %}
+                    <span>
+                        <i class="bi-person"></i> {{ object.actor.username }}
+                    </span>
+                {% endif %}
+                <span>
+                    <i class="bi-clock"></i>
+                    <time datetime="{{ object.created|date:'c' }}" title="{{ object.created|date:'r' }}">
+                        {{ object.created|date:"M d Y H:i e" }}
+                    </time>
+                </span>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <div class="text-center my-3">No responses available.</div>
+{% endfor %}
+{% if page_obj.has_next %}
+    <div class="text-center my-2"><i class="bi-arrow-down"></i></div>
+    <nav class="my-3">
+        <ul class="list-group list-group-horizontal justify-content-center">
+            <li class="list-group-item">
+                <a class="icon-link" href="?page={{ page_obj.next_page_number }}">
+                    <i class="bi-chevron-right"></i> Next
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a class="icon-link" href="?page={{ page_obj.paginator.num_pages }}">
+                    <i class="bi-chevron-bar-right"></i> Last
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endif %}
+
+
+
+<h2 class="text-center mt-5 mb-3">Add Response</h2>
+<div class="card col-lg-9 mx-auto my-3">
+    <form class="card-body" method="post" action="{% url 'moderation:add-response' view.report.code %}">
+        {% if not request.user.is_staff %}
+            <div class="alert alert-info text-center">
+                You may add a message to share additional information.
+            </div>
+        {% endif %}
+        {% csrf_token %}
+        {{ response_form|crispy }}
+        <div class="text-center mt-3">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi-check-circle"></i> Submit
+            </button>
+        </div>
+    </form>
+</div>
+
+
+<div class="text-center mt-5">
+    <a class="btn btn-secondary" href="{% url 'moderation:report-list' %}">
+        <i class="bi-list"></i> Reports
+    </a>
+</div>
+
+{% endblock %}

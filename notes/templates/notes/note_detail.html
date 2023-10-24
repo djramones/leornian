@@ -14,6 +14,11 @@
 </div>
 
 {% if not user.is_authenticated %}
+<div class="text-center my-4">
+    <a class="icon-link link-secondary" href="{% url 'moderation:submit-report' 'note' note.code %}">
+        <i class="bi-flag"></i> Report Content
+    </a>
+</div>
 <section class="text-center mt-5">
     <strong>Leornian</strong> is a notes sharing and learning tool. <a href="{% url 'home' %}">Learn more</a> (or <a href="{% url 'login' %}">log in</a>).
 </section>

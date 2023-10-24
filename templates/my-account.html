@@ -19,6 +19,11 @@
     </li>
 </ul>
 <div class="text-center mx-auto">
+    <div class="my-4">
+        <a class="icon-link link-secondary" href="{% url 'moderation:report-list' %}">
+            <i class="bi-flag"></i> Content &amp; Account Reports
+        </a>
+    </div>
     <form method="post" action="{% url 'logout' %}" class="d-inline-block">
         {% csrf_token %}
         <button class="btn btn-primary" type="submit">

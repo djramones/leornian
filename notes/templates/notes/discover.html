@@ -22,14 +22,21 @@
             <i class="bi-shuffle"></i> Next
         </a>
     </div>
-    {% if note.author %}
-        <div class="text-center mt-4">
-            View more notes by
-            <a class="icon-link" href="{% url 'notes:notes-by-username' note.author.username %}">
-                {{ note.author.username }}
+    <div class="text-center mt-4">
+        {% if note.author %}
+            <p>
+                View more notes by
+                <a class="icon-link" href="{% url 'notes:notes-by-username' note.author.username %}">
+                    {{ note.author.username }}
+                </a>
+            </p>
+        {% endif %}
+        <p>
+            <a class="icon-link link-secondary" href="{% url 'moderation:submit-report' 'note' note.code %}">
+                <i class="bi-flag"></i> Report Content
             </a>
-        </div>
-    {% endif %}
+        </p>
+    </div>
 {% else %}
     <div class="text-center">
         <p>No note available.</p>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Submit Report | Leornian{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4"><i class="bi-flag"></i> Submit Report</h1>
+
+<div class="text-center mb-4">
+    You are submitting a report for <a href="{{ content_object.get_absolute_url }}">{{ view.kwargs.type }} {{ content_object }}</a>
+</div>
+
+<form method="post" action="">
+    <div class="card col-lg-9 mx-auto">
+        <div class="card-body">
+            {% csrf_token %}
+            {{ form|crispy }}
+        </div>
+    </div>
+    <div class="text-center mt-3">
+        <button class="btn btn-primary" type="submit">
+            <i class="bi-check-circle"></i> Submit
+        </button>
+        {% if request.GET.redirect_url %}
+            <a class="btn btn-secondary" href="{{ request.GET.redirect_url }}">Cancel</a>
+        {% endif %}
+    </div>
+</form>
+
+{% endblock %}
