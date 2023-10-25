@@ -4,31 +4,49 @@
 
 {% block content %}
 <h1 class="text-center mb-5"><i class="bi-person-circle"></i> My Account</h1>
-<ul class="list-group col-lg-6 mx-auto my-3">
-    <li class="list-group-item">
-        <i class="bi-at"></i> <strong>Username</strong>: {{ user.username }}
-    </li>
-    <li class="list-group-item">
-        <i class="bi-envelope"></i> <strong>Email</strong>: {{ user.email }}
-    </li>
-    <li class="list-group-item">
-        <i class="bi-clock"></i> <strong>Account Created</strong>:
-        <time datetime="{{ user.date_joined|date:'c' }}" title="{{ user.date_joined|date:'r' }}">
-            {{ user.date_joined|date:"d M Y (e)" }}
-        </time>
-    </li>
-</ul>
-<div class="text-center mx-auto">
-    <div class="my-4">
-        <a class="icon-link link-secondary" href="{% url 'moderation:report-list' %}">
-            <i class="bi-flag"></i> Content &amp; Account Reports
-        </a>
+<div class="row">
+    <div class="col-lg-6">
+        <ul class="list-group mb-4">
+            <li class="list-group-item">
+                <i class="bi-at"></i> <strong>Username</strong>: {{ user.username }}
+            </li>
+            <li class="list-group-item">
+                <i class="bi-envelope"></i> <strong>Email</strong>: {{ user.email }}
+            </li>
+            <li class="list-group-item">
+                <i class="bi-clock"></i> <strong>Account Created</strong>:
+                <time datetime="{{ user.date_joined|date:'c' }}" title="{{ user.date_joined|date:'r' }}">
+                    {{ user.date_joined|date:"d M Y (e)" }}
+                </time>
+            </li>
+        </ul>
     </div>
-    <form method="post" action="{% url 'logout' %}" class="d-inline-block">
-        {% csrf_token %}
-        <button class="btn btn-primary" type="submit">
-            <i class="bi-box-arrow-left"></i> Log Out
-        </button>
-    </form>
+    <div class="col-lg-6">
+        <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item">
+                <a class="icon-link" href="#!">
+                    <i class="bi-download"></i> Download Your Data
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a class="icon-link" href="{% url 'moderation:report-list' %}">
+                    <i class="bi-flag"></i> Content &amp; Account Reports
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a class="icon-link" href="{% url 'password_change' %}">
+                    <i class="bi-key"></i> Change Password
+                </a>
+            </li>
+            <li class="list-group-item">
+                <form class="d-flex" method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-link icon-link border border-0 p-0" type="submit">
+                        <i class="bi-box-arrow-left"></i> Log Out
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
 </div>
 {% endblock %}
