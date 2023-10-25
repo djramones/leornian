@@ -1,3 +1,8 @@
+import csv
+import io
+import json
+import zipfile
+from datetime import datetime
 from unittest.mock import patch
 
 from django.contrib.auth import get_user, get_user_model
@@ -7,10 +12,13 @@ from django.core.handlers.asgi import ASGIHandler
 from django.core.handlers.wsgi import WSGIHandler
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
-from django.urls import reverse, resolve
+from django.urls import resolve, reverse
+
+from notes.models import Note
 
 from . import context_processors as ctx_procs
 from . import forms as site_forms
+from . import services
 
 UserModel = get_user_model()
 
@@ -76,7 +84,7 @@ class XSGISmokeTests(TestCase):
         self.assertIs(type(wsgi.application), WSGIHandler)
 
 
-class ViewsTests(TestCase):
+class HomeViewTests(TestCase):
     def test_home_view(self):
         UserModel.objects.create_user("mary", "mary@example.com", "1234")
 
@@ -263,3 +271,97 @@ class ContextProcessorsTests(TestCase):
         self.assertEqual(ctx_procs.colormode(req)["colormode"], None)
         req.COOKIES.update({"colormode": "dark"})
         self.assertEqual(ctx_procs.colormode(req)["colormode"], "dark")
+
+
+class DownloadAccountDataTestsBase(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.empty_account = UserModel.objects.create_user(
+            "empty", "empty@example.com", "..."
+        )
+        self.u1 = UserModel.objects.create_user("u1", "u1@example.com", "...")
+        self.u2 = UserModel.objects.create_user("u2", "u2@example.com", "...")
+        self.n1 = Note.objects.create(text="ñ", author=self.u1)
+        self.n2 = Note.objects.create(author=self.u2)
+        self.n3 = Note.objects.create(visibility=Note.Visibility.UNLISTED)
+        self.u1.collected_notes.add(self.n1)
+        self.u1.collected_notes.add(self.n2)
+        self.u1.collected_notes.add(self.n3)
+
+
+class ExportUserDataTests(DownloadAccountDataTestsBase):
+    def test_empty_account(self):
+        req = self.factory.get("/test/")
+        req.user = self.empty_account
+        with self.assertNumQueries(1):
+            data = services.export_user_data(req)
+        with zipfile.ZipFile(data, mode="r") as zipf:
+            readme = zipf.read("README.txt").decode()
+            self.assertIn("account `empty`", readme)
+            self.assertIn("email: empty@example.com", readme)
+            self.assertIn("notes in collection: 0", readme)
+            notes_csv = zipf.read("collected_notes.csv").decode("utf-8-sig")
+            self.assertEqual(notes_csv, "")
+            notes_json = zipf.read("collected_notes.json").decode()
+            self.assertEqual(notes_json, "[]")
+
+    def test_non_empty_account(self):
+        req = self.factory.get("/test/")
+        req.user = self.u1
+        with self.assertNumQueries(1):
+            data = services.export_user_data(req)
+        with zipfile.ZipFile(data, mode="r") as zipf:
+            # Check README
+            readme = zipf.read("README.txt").decode()
+            self.assertIn("account `u1`", readme)
+            self.assertIn("email: u1@example.com", readme)
+            self.assertIn("notes in collection: 3", readme)
+
+            # Check CSV data without parsing
+            notes_csv = zipf.read("collected_notes.csv").decode("utf-8-sig")
+            self.assertIn("Note Code", notes_csv)
+            self.assertIn("ñ", notes_csv)
+            self.assertIn(self.n1.code, notes_csv)
+            self.assertIn(self.n3.get_visibility_display(), notes_csv)
+
+            # Check CSV data with parsing
+            with zipf.open("collected_notes.csv", "r") as zip_csv:
+                notes_csvf = io.TextIOWrapper(zip_csv, encoding="utf-8-sig")
+                reader = csv.DictReader(notes_csvf)
+                csvdata = []
+                for row in reader:
+                    csvdata.append(row)
+                self.assertEqual(len(csvdata), 3)
+                self.assertEqual(csvdata[0]["Note Code"], self.n1.code)
+                self.assertEqual(csvdata[0]["Text"], "ñ")
+
+            # Check JSON
+            notes_json = zipf.read("collected_notes.json").decode()
+            json_data = json.loads(notes_json)
+            self.assertEqual(len(json_data), 3)
+
+
+class DownloadAccountDataViewTests(DownloadAccountDataTestsBase):
+    def test_get_as_unauthorized(self):
+        res = self.client.get(reverse("download-account-data"))
+        self.assertEqual(res.status_code, 302)
+
+    def test_smoke_test_get_as_authorized(self):
+        self.client.login(username="u1", password="...")
+        res = self.client.get(reverse("download-account-data"))
+        self.assertEqual(res.status_code, 200)
+
+    @patch("leornian_helpers.mixins._verify_form_captcha")
+    def test_post_request(self, mock_verify_captcha):
+        # Mock _verify_form_captcha to simply return the form object passed
+        # to it, to skip the external verification request:
+        mock_verify_captcha.side_effect = lambda *args: args[1]
+        self.client.login(username="empty", password="...")
+        res = self.client.post(reverse("download-account-data"))
+        file_date = datetime.now().isoformat()[:10]
+        self.assertIn(
+            f"leornian-data-empty-{file_date}.zip", res.headers["Content-Disposition"]
+        )
+        data = io.BytesIO(res.getvalue())
+        with zipfile.ZipFile(data, mode="r") as zipf:
+            self.assertIn("README.txt", zipf.namelist())

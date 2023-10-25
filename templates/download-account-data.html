@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Download Account Data | Leornian{% endblock %}
+
+{% block content %}
+<div class="card col-lg-6 mx-auto">
+    <div class="card-header"><strong>Download account data</strong></div>
+    <div class="card-body">
+        <p>Download a copy of your account data (in CSV and JSON formats, zipped).</p>
+        <form method="post" action="">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="my-3">
+                <div class="h-captcha" data-sitekey="{{ captcha_site_key }}" {% if colormode %}data-theme="{{ colormode }}"{% endif %}></div>
+                <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+            </div>
+            <button class="btn btn-primary" type="submit">
+                <i class="bi-download"></i> Download Account Data
+            </button>
+        </form>
+        <a class="icon-link mt-3" href="{% url 'my-account' %}">
+            Back to My Account
+        </a>
+    </div>
+</div>
+{% endblock %}

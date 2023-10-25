@@ -27,6 +27,11 @@ urlpatterns = [
         login_required(TemplateView.as_view(template_name="my-account.html")),
         name="my-account",
     ),
+    path(
+        "accounts/download-account-data/",
+        site_views.DownloadAccountData.as_view(),
+        name="download-account-data",
+    ),
     path("help/", TemplateView.as_view(template_name="help.html"), name="help"),
     path("support/", include("support.urls")),
     path("moderation/", include("moderation.urls")),
