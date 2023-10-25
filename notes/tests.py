@@ -423,8 +423,8 @@ class TemplatesTests(TestCase):
         self.assertInHTML(
             '<a class="nav-link" href="/collection/by-me/">By Me</a>', out
         )
-        self.assertInHTML(
-            '<div class="alert alert-info text-center">These notes are authored by you but are <strong><em>not saved in your collection</em></strong>.</div>',
+        self.assertIn(
+            "These notes are authored by you <strong><em>but are not saved in your collection</em></strong>",
             out,
         )
 

@@ -29,7 +29,7 @@
 </nav>
 {% if namespace == 'notes' and url_name == 'not-in-collection-by-me' %}
     <div class="alert alert-info text-center">
-        These notes are authored by you but are <strong><em>not saved in your collection</em></strong>.
+        These notes are authored by you <strong><em>but are not saved in your collection</em></strong> (i.e., will not appear in <a href="{% url 'notes:drill' %}">Drill</a>, etc.).
     </div>
 {% endif %}
 {% if namespace == 'notes' and url_name == 'my-collection-promoted' %}
