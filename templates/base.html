@@ -7,6 +7,9 @@
         <title>{% block title %}Leornian{% endblock %}</title>
         <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}">
         <link rel="stylesheet" href="{% static 'bootstrap/bootstrap-icons.min.css' %}">
+        <meta property="og:image" content="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% static 'images/pexels-pixabay-159711.jpg' %}">
+
+        {% block head_extras %}{% endblock %}
     </head>
     <body>
         {% block navigation %}

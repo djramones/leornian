@@ -445,6 +445,35 @@ class TemplatesTests(TestCase):
         )
 
 
+class NoteDetailTemplateTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_normal_vis_note_robots_meta_tag(self):
+        note = Note.objects.create(visibility=Note.Visibility.NORMAL)
+        req = self.factory.get("...")
+        req.user = AnonymousUser()
+        req.resolver_match = resolve(
+            reverse("notes:single-note", kwargs={"slug": note.code})
+        )
+        out = render_to_string(
+            "notes/note_detail.html", {"request": req, "object": note}
+        )
+        self.assertNotIn("noindex", out)
+
+    def test_unlisted_note_robots_meta_tag(self):
+        note = Note.objects.create(visibility=Note.Visibility.UNLISTED)
+        req = self.factory.get("...")
+        req.user = AnonymousUser()
+        req.resolver_match = resolve(
+            reverse("notes:single-note", kwargs={"slug": note.code})
+        )
+        out = render_to_string(
+            "notes/note_detail.html", {"request": req, "object": note}
+        )
+        self.assertIn("noindex", out)
+
+
 class NoteControlsTemplateTagTests(TestCase):
     def setUp(self):
         self.note = Note.objects.create()
