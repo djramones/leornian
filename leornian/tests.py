@@ -340,6 +340,14 @@ class ExportUserDataTests(DownloadAccountDataTestsBase):
             json_data = json.loads(notes_json)
             self.assertEqual(len(json_data), 3)
 
+        # Check compression
+        content_size = len(readme) + len(notes_csv) + len(notes_json)
+        zipped_size = len(data.getvalue())
+        # 0.8 is an arbitrary coefficient, just to make sure the compression
+        # is not insignificant. At this small content size, the compression
+        # ratios are not large.
+        self.assertLess(zipped_size, 0.8 * content_size)
+
 
 class DownloadAccountDataViewTests(DownloadAccountDataTestsBase):
     def test_get_as_unauthorized(self):
