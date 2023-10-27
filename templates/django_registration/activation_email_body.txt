@@ -1,4 +1,4 @@
-An account with the username `{{ user.username }}` has been registered using this email address at Leornian ({{ site.domain }}).
+An account with the username `{{ user.username }}` has been registered using this email address ({{ user.email }}) at Leornian ({{ site.domain }}).
 
 If this was you, please visit the following link to activate your account:
 
