@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {# We maximize the information content of the document title but limit it to ~140 characters: #}
 
@@ -17,6 +18,14 @@
 {% endblock %}
 
 {% block content %}
+
+{% if not user.is_authenticated %}
+    <div class="d-flex justify-content-center align-items-center gap-2 my-4">
+        <img class="leornian-logo" src="{% static 'images/leornian.svg' %}">
+        <h1 class="d-inline-block fs-3 m-0">Leornian</h1>
+    </div>
+{% endif %}
+
 <div class="col-lg-9 mx-auto">
     {% include 'notes/includes/note_card.html' %}
 </div>
@@ -28,7 +37,7 @@
     </a>
 </div>
 <section class="text-center mt-5">
-    <strong>Leornian</strong> is a notes sharing and learning tool. <a href="{% url 'home' %}">Learn more</a> (or <a href="{% url 'login' %}">log in</a>).
+    <strong>Leornian</strong> is a notes sharing and learning tool. <a href="{% url 'about' %}">Learn more</a> (or <a href="{% url 'login' %}">log in</a>).
 </section>
 {% endif %}
 

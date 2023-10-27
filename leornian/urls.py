@@ -32,6 +32,7 @@ urlpatterns = [
         site_views.DownloadAccountData.as_view(),
         name="download-account-data",
     ),
+    path("about/", TemplateView.as_view(template_name="about.html"), name="about"),
     path("help/", TemplateView.as_view(template_name="help.html"), name="help"),
     path("support/", include("support.urls")),
     path("moderation/", include("moderation.urls")),

@@ -45,7 +45,7 @@
 {% endif %}
 {% if not user.is_authenticated %}
     <section class="text-center text-secondary mt-3">
-        You can save notes into your own collection, and more, with an account. <a class="link-secondary" href="{% url 'leornian-register' %}">Sign up</a> (or <a class="link-secondary" href="{% url 'login' %}">log in</a>).
+        You can save notes into your own collection, and more, with an account. <a class="link-secondary" href="{% url 'about' %}">Learn more</a> (or <a class="link-secondary" href="{% url 'login' %}">log in</a>).
     </section>
 {% endif %}
 {% endblock %}

@@ -1,13 +1,26 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block navigation %}{% endblock %}
+
 {% block content %}
 <div class="row align-items-center row-gap-3">
     <div class="col-lg-4">
-        <p class="fs-5">Leornian is a notes sharing and learning tool.</p>
-        <a class="btn btn-primary" href="{% url 'notes:discover' %}">
-            <i class="bi-binoculars"></i> Browse Notes
-        </a>
+        <div class="d-flex align-items-center gap-2 my-4">
+            <img class="leornian-logo" src="{% static 'images/leornian.svg' %}">
+            <h1 class="d-inline-block fs-3 m-0">Leornian</h1>
+        </div>
+        <p>A notes sharing and learning tool.</p>
+        <div class="my-4">
+            <a class="btn btn-primary" href="{% url 'about' %}">
+                <i class="bi-info-circle"></i> Learn More
+            </a>
+            &nbsp;
+            <a class="btn btn-primary" href="{% url 'notes:discover' %}">
+                <i class="bi-binoculars"></i> Browse Notes
+            </a>
+        </div>
+        <a href="{% url 'leornian-register' %}">Sign up</a> or <a href="{% url 'login' %}">log in</a>.
     </div>
     <div class="col-lg-8">
         <img class="img-fluid rounded" src="{% static 'images/pexels-pixabay-159711.jpg' %}" alt="Shelves full of colorful books.">

@@ -35,6 +35,10 @@ class BasicTests(TestCase):
         response = self.client.get("/accounts/me/")
         self.assertRedirects(response, "/accounts/login/?next=/accounts/me/")
 
+        # about
+        response = self.client.get("/about/")
+        self.assertEqual(response.status_code, 200)
+
         # help
         response = self.client.get("/help/")
         self.assertEqual(response.status_code, 200)
@@ -60,6 +64,10 @@ class BasicTests(TestCase):
 
         # home
         response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+
+        # about
+        response = self.client.get("/about/")
         self.assertEqual(response.status_code, 200)
 
         # my-account

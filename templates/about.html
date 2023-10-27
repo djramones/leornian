@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Leornian{% endblock %}
+
+{% block navigation %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center gap-2 my-4">
+    <img class="leornian-logo" src="{% static 'images/leornian.svg' %}">
+    <h1 class="d-inline-block fs-3 m-0">Leornian</h1>
+</div>
+<hr class="col-lg-4 mx-auto">
+<h2 class="text-center">A home for your next note-to-self.</h2>
+<p class="text-center">Leornian is a notes sharing and learning tool.</p>
+{# TODO: complete this page stub #}
+<div class="text-center">
+    {% if not user.is_authenticated %}
+        <a class="btn btn-primary" href="{% url 'leornian-register' %}">
+            <i class="bi-arrow-right-square"></i> Sign Up
+        </a>
+        &nbsp;
+        <a class="btn btn-primary" href="{% url 'notes:discover' %}">
+            <i class="bi-binoculars"></i> Browse Notes
+        </a>
+        <p class="text-center text-secondary mt-3">
+            (or <a class="icon-link link-secondary" href="{% url 'login' %}">log in</a>)
+        </p>
+    {% else %}
+        <a class="btn btn-primary" href="{% url 'home' %}">
+            <i class="bi-play"></i> Start
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
