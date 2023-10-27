@@ -12,6 +12,6 @@ requests==2.31.0
 # Development requirements
 coverage==7.3.2
 django-coverage-plugin==3.1.0
-pylint==2.17.7
-pylint-django==2.5.3
+pylint==3.0.2
+pylint-django==2.5.5
 django-debug-toolbar==4.2.0
