@@ -50,12 +50,13 @@ class ContactSupportTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
 
     def test_follow_success_url(self):
+        self.client.login(username="mary", password="1234")
         res = self.client.post(
             reverse("support:contact"),
             {"subject": "Foo", "message": "Bar."},
             follow=True,
         )
-        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "submitted")
 
 
 class SendSupportMessageTests(TestCase):
