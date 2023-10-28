@@ -125,8 +125,14 @@
                 <a class="link-body-emphasis text-decoration-none" href="{% url 'home' %}">
                     <strong>Leornian</strong>
                 </a>
+                <a class="icon-link link-secondary" href="{% url 'terms-and-privacy' %}">
+                    Terms &amp; Privacy
+                </a>
+                <a class="icon-link link-secondary" href="{% url 'content-license' %}">
+                    Content License
+                </a>
                 <a class="icon-link link-secondary" href="https://github.com/djramones/leornian">
-                    Platform source on GitHub
+                    Source Code
                     <i class="bi-box-arrow-up-right"></i>
                 </a>
             </small>
@@ -170,7 +176,7 @@
                 document.getElementById("footerSmall").insertAdjacentHTML(
                     'beforeend',
                     `<a id="colorModeToggle" class="icon-link link-secondary" href="#" role="button">
-                        <i class="bi-moon-stars"></i> Toggle dark mode
+                        <i class="bi-moon-stars"></i> Toggle Dark Mode
                     </a>`
                 )
                 document.getElementById('colorModeToggle').addEventListener(

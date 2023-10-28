@@ -34,6 +34,16 @@ urlpatterns = [
     ),
     path("about/", TemplateView.as_view(template_name="about.html"), name="about"),
     path("help/", TemplateView.as_view(template_name="help.html"), name="help"),
+    path(
+        "terms-and-privacy/",
+        site_views.TermsAndPrivacy.as_view(),
+        name="terms-and-privacy",
+    ),
+    path(
+        "content-license/",
+        TemplateView.as_view(template_name="content-license.html"),
+        name="content-license",
+    ),
     path("support/", include("support.urls")),
     path("moderation/", include("moderation.urls")),
     path("", include("notes.urls")),

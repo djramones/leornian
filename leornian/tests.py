@@ -43,6 +43,14 @@ class BasicTests(TestCase):
         response = self.client.get("/help/")
         self.assertEqual(response.status_code, 200)
 
+        # terms-and-privacy
+        response = self.client.get("/terms-and-privacy/")
+        self.assertEqual(response.status_code, 200)
+
+        # content-license
+        response = self.client.get("/content-license/")
+        self.assertEqual(response.status_code, 200)
+
         # Admin views
         response = self.client.get("/admin/")
         self.assertRedirects(response, "/admin/login/?next=/admin/")

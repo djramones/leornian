@@ -1,12 +1,15 @@
 from datetime import datetime
 
-from django import forms
+from django import forms, template
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import FileResponse, HttpResponseRedirect
+from django.utils import safestring
 from django.utils.text import slugify
 from django.views.generic import FormView, TemplateView
 from django_registration.backends.activation.views import RegistrationView as DjRegView
+from markdown_it import MarkdownIt
 
 from leornian_helpers.mixins import CaptchaFormMixin
 from notes.views import Start
@@ -19,6 +22,27 @@ def home(request):
     if request.user.is_authenticated:
         return Start.as_view()(request)
     return TemplateView.as_view(template_name="home.html")(request)
+
+
+class TermsAndPrivacy(TemplateView):
+    template_name = "terms-and-privacy.html"
+
+    def get_context_data(self, **kwargs):
+        # The Terms of Service is written in Markdown with Django template
+        # variables. We run it first through the Django template system:
+        content = template.loader.render_to_string(
+            "terms-and-privacy.md",
+            {
+                "service_name": settings.TOS_SERVICE_NAME,
+                "service_url": settings.TOS_SERVICE_URL,
+                "governing_country": settings.TOS_GOVERNING_COUNTRY,
+            },
+        )
+        # before actually rendering to HTML. The source is trusted so
+        # we can use default MarkdownIt configuration (usually unsafe):
+        content = safestring.mark_safe(MarkdownIt().render(content))
+        kwargs.update({"terms_and_privacy": content})
+        return super().get_context_data(**kwargs)
 
 
 class DownloadAccountData(LoginRequiredMixin, CaptchaFormMixin, FormView):
