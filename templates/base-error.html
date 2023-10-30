@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navigation %}{# Skip the navbar. #}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center gap-2 my-4">
+    <img class="leornian-logo" src="{% static 'images/leornian.svg' %}">
+    <h1 class="d-inline-block fs-3 m-0">Leornian</h1>
+</div>
+<h2 class="text-center my-5">
+    <i class="bi-exclamation-circle"></i> {% block error_header %}{% endblock %}
+</h2>
+<div class="text-center col-lg-6 mx-auto">
+    <div class="alert alert-warning">
+        {% block error_message %}{% endblock %}
+    </div>
+    <p>
+        <a class="icon-link" href="{% url 'home' %}">
+            <i class="bi-house"></i> Home
+        </a>
+    </p>
+</div>
+{% endblock %}
