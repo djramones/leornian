@@ -1,10 +1,10 @@
-*Last updated: 28 October 2023*
+*Last updated: 30 October 2023*
 
 *The version history of this document should be available in the source code repository of this website.*
 
 ---
 
-{{ service_name }} is a Service, accessible at `{{ service_url }}/`, for saving, sharing, and viewing notes (short pieces of text data).
+{{ service_name }} is a Service, accessible at `{{ service_url }}`, for saving, sharing, and viewing notes (short pieces of text data).
 
 This Service is provided free of charge.
 
@@ -81,7 +81,7 @@ Systems used to run the Service, some of which are operated by third-party servi
 
 **Cookies**
 
-The Service uses only necessary first-party cookies for security and to provide requested functionality; no personally-identifying third-party cookies or trackers are intentionally served by {{ service_name }}. This is why the Service does not present a “cookie banner”.
+The Service uses only strictly necessary cookies for security and to provide requested functionality; no personally-identifying third-party cookies or trackers are intentionally served by {{ service_name }}. This is why the Service does not present a “cookie banner”.
 
 If you find that, in the course of using the Service, privacy-violating cookies are being set on your device, you may report it to the Service operator(s) after making an attempt to ascertain that such cookies are not being delivered by any hardware, software, or network configurations outside of the control of the Service.
 
