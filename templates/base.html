@@ -141,12 +141,16 @@
         <script>
             /* Theme color mode toggle */
             window.onload = (event) => {
-                // Get theme setting from HTML, or compute a default. This
-                // means that the color mode cookie (set later) should be
-                // processed in the Django template.
+                // Get theme setting from the HTML, or from an existing
+                // cookie, or compute a default.
                 let currTheme =
                     document.documentElement.getAttribute('data-bs-theme')
-                if (currTheme == null) {
+                if (!currTheme) {
+                    currTheme = document.cookie.split(";").find(
+                        (item) => item.trim().startsWith("colormode")
+                    )?.split("=")[1]?.trim()
+                }
+                if (!currTheme) {
                     currTheme = window.matchMedia(
                         '(prefers-color-scheme: dark)'
                     ).matches ? 'dark' : 'light'
