@@ -238,6 +238,22 @@ class DjangoRegistrationTests(TestCase):
         resolver_match = resolve(reverse("django_registration_register"))
         self.assertEqual(resolver_match.view_name, "leornian-register")
 
+    def test_reg_form_terms_checkbox_label_link(self):
+        rendered_form = site_forms.RegistrationForm().as_div()
+        self.assertIn(f"<a href='{reverse('terms-and-privacy')}'>", rendered_form)
+
+    def test_reg_form_required_terms_acceptance(self):
+        form = site_forms.RegistrationForm(
+            {
+                "username": "foobar",
+                "email": "foo@example.com",
+                "password1": "whz64rh7wu23wwec",
+                "password2": "whz64rh7wu23wwec",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("You must agree to the Terms", str(form.errors))
+
     def test_reg_form_custom_help_text_display(self):
         """Test display of the custom help text."""
         res = self.client.get(reverse("leornian-register"))
@@ -249,13 +265,14 @@ class DjangoRegistrationTests(TestCase):
         self.assertContains(res, "Enter the same password as before")
 
     def test_reg_form_help_text_validity(self):
-        """Test if the custom help text is accurate."""
+        """Test if the custom username field help text is accurate."""
         form = site_forms.RegistrationForm(
             {
                 "username": "a0-_.+",
                 "email": "foo@example.com",
                 "password1": "whz64rh7wu23wwec",
                 "password2": "whz64rh7wu23wwec",
+                "terms_acceptance": "on",
             }
         )
         self.assertTrue(form.is_valid())
@@ -272,6 +289,7 @@ class DjangoRegistrationTests(TestCase):
                 "email": "foo@example.com",
                 "password1": "whz64rh7wu23wwec",
                 "password2": "whz64rh7wu23wwec",
+                "terms_acceptance": "on",
                 "h-captcha-response": "10000000-aaaa-bbbb-cccc-000000000001",
             },
         )
