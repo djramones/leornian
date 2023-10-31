@@ -2,5 +2,6 @@
 plugins = django_coverage_plugin
 omit =
     venv/*
+    static-collected/*
     requirement*.txt
     */LICENSE.txt
