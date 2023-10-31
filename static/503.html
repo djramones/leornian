@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Service Unavailable (HTTP 503)</title>
+
+        <link rel="stylesheet" href="/static/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/bootstrap/bootstrap-icons.min.css">
+
+    </head>
+    <body>
+        <main class="col-lg-8 mx-auto p-4 pt-lg-5">
+            <h2 class="text-center my-5">
+                <i class="bi-exclamation-circle"></i>
+                Service Unavailable (HTTP 503)
+            </h2>
+            <div class="alert alert-warning text-center col-lg-8 mx-auto">
+                Sorry, the service is currently unavailable.
+                Please check back later.
+            </div>
+        </main>
+        <script>
+            /* Set theme color mode */
+            window.onload = (event) => {
+                // Get theme setting from an existing cookie,
+                // or compute a default.
+                let currTheme = document.cookie.split(";").find(
+                    (item) => item.trim().startsWith("colormode")
+                )?.split("=")[1]?.trim()
+                if (!currTheme) {
+                    currTheme = window.matchMedia(
+                        '(prefers-color-scheme: dark)'
+                    ).matches ? 'dark' : 'light'
+                }
+
+                // Apply current theme setting
+                document.documentElement.setAttribute(
+                    'data-bs-theme', currTheme)
+
+                // Set a cookie with 400-day max-age. See:
+                // https://developer.chrome.com/blog/cookie-max-age-expires/
+                document.cookie =
+                    `colormode=${currTheme};path=/;max-age=34560000`
+            }
+        </script>
+    </body>
+</html>
