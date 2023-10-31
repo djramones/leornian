@@ -47,6 +47,7 @@ urlpatterns = [
     path("discover/", views.Discover.as_view(), name="discover"),
     path("drill/", views.Drill.as_view(), name="drill"),
     re_path(
+        # Same as "<slug:code>/<action>/" where <action> is save or unsave:
         r"^(?P<code>[\w-]+)/(?P<action>save|unsave)/$",
         views.CollectionAction.as_view(),
         name="collection-action",
