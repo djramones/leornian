@@ -14,6 +14,7 @@ from django.core.exceptions import (
 )
 from django.core.paginator import EmptyPage, Paginator
 from django.db import transaction
+from django.forms import modelform_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -32,10 +33,12 @@ from django.views.generic.detail import SingleObjectMixin
 
 from formtools.preview import FormPreview
 
-from .forms import NoteForm
 from .models import Collection, Deattribution, Note
 
 UserModel = get_user_model()
+
+
+NoteForm = modelform_factory(Note, fields=["text", "visibility"])
 
 
 class GracefulPaginator(Paginator):
