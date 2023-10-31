@@ -11,9 +11,109 @@
     <h1 class="d-inline-block fs-3 m-0">Leornian</h1>
 </div>
 <hr class="col-lg-4 mx-auto">
-<h2 class="text-center">A home for your next note-to-self.</h2>
-<p class="text-center">Leornian is a notes sharing and learning tool.</p>
-{# TODO: complete this page stub #}
+
+<div class="text-center mb-5">
+    {# Use `text-nowrap` spans to force better-looking breaks on mobile: #}
+    <h2>A home for your next <span class="text-nowrap">note-to-self.</span></h2>
+    <p>Leornian is a free tool for writing, <span class="text-nowrap">sharing, and reviewing notes.</span></p>
+</div>
+
+<div class="row align-items-center">
+    <div class="col-lg-6 mb-5 order-lg-2">
+        <img class="img-fluid rounded" src="{% static 'notes/images/pexels-lil-artsy-1925536-edited.jpg' %}" alt="">
+    </div>
+    <div class="col-lg-6 mb-5 order-lg-1">
+        <h2>For the lifelong learners and knowledge hoarders</h2>
+        <p>Leornian is for you if you love learning even just in small daily doses. It’s for you if you’ve ever had the habit of jotting down short notes that you tuck away with the intention of revisiting from time to time, to return to whenever you feel stuck and need a little nugget of wisdom or insight to boost your day.</p>
+    </div>
+</div>
+
+<div class="row align-items-center">
+    <div class="col-lg-6 mb-5">
+        <img class="img-fluid rounded" src="{% static 'notes/images/pexels-alvaro-matzumura-3380524-edited.jpg' %}" alt="">
+    </div>
+    <div class="col-lg-6 mb-5">
+        <h2>Sharing powerful bytes of knowledge</h2>
+        <p>The notes you write on Leornian contribute to a <em>digital commons</em>, and it’s a good place for those who enjoy sharing knowledge for its pure and intrinsic pleasures. But it’s not a social network, and you can go on typing away just for yourself. It’s just that whenever you feel like it, a fresh note absolutely free for you to save to your own collection is always only a few taps away.</p>
+    </div>
+</div>
+
+<div class="row align-items-center">
+    <div class="col-lg-6 mb-5 order-lg-2">
+        <img class="img-fluid rounded" src="{% static 'notes/images/pexels-pixabay-159775-edited.jpg' %}" alt="">
+    </div>
+    <div class="col-lg-6 mb-5 order-lg-1">
+        <h2>Summoning serendipity</h2>
+        <p>The same words can speak to us in different ways through the days and years, but we often review our notes in a linear, predictable order that can be tedious and ineffective. Leornian, through a simple and transparent algorithm, allows you to review your notes in a fun fashion that encourages active reflection and invites creativity.</p>
+    </div>
+</div>
+
+<div class="row align-items-stretch my-5">
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi-piggy-bank fs-1"></i>
+                <h2 class="fs-3">Free as in beer</h2>
+                <p>Leornian is a passion project, not for profit, and powered solely by volunteer service.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi-megaphone fs-1"></i>
+                <h2 class="fs-3">Free as in speech</h2>
+                <p>The platform stands on the shoulders of open-source giants, and is itself open-sourced.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi-unlock fs-1"></i>
+                <h2 class="fs-3">No lock-in</h2>
+                <p>Easily and completely export your notes collection using standard formats.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi-markdown fs-1"></i>
+                <h2 class="fs-3">Rich formatting</h2>
+                <p>Work with basic Markdown syntaxes to write clearer and more effective notes.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi-cc-circle fs-1"></i>
+                <h2 class="fs-3">The common good</h2>
+                <p>Contents are Creative Commons-licensed, following a model used by great public websites.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi-person-workspace fs-1"></i>
+                <h2 class="fs-3">Social-optional</h2>
+                <p>Leornian can be a focused home for your text snippets, more peaceful and less distracting than social media platforms.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi-tools fs-1"></i>
+                <h2 class="fs-3">More coming soon</h2>
+                <p>Leornian is under development, and more useful features will arrive soon.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="text-center">
     {% if not user.is_authenticated %}
         <div class="d-flex justify-content-center gap-2 my-3">
@@ -24,9 +124,9 @@
                 <i class="bi-binoculars"></i> Browse Notes
             </a>
         </div>
-        <p class="text-center text-secondary mt-3">
-            (or <a class="icon-link link-secondary" href="{% url 'login' %}">log in</a>)
-        </p>
+        <small class="text-center text-secondary mt-3">
+            (or <a class="icon-link link-secondary" href="{% url 'login' %}">log in</a> if you already have an account)
+        </small>
     {% else %}
         <a class="btn btn-primary" href="{% url 'home' %}">
             <i class="bi-play"></i> Start
