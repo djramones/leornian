@@ -11,8 +11,8 @@
     <footer class="card-footer">
         <small class="text-secondary d-flex flex-wrap gap-3 my-3">
             {% if object.author %}
-                <a class="link-secondary icon-link" href="{% url 'notes:notes-by-username' object.author.username %}">
-                    <i class="bi-person"></i> {{ object.author.username }}
+                <a class="link-secondary icon-link" href="{% url 'notes:notes-by-username' object.author.username %}" title="{{ object.author.username }}">
+                    <i class="bi-person"></i> {{ object.author.username|truncatechars:20 }}
                 </a>
             {% endif %}
             <span>

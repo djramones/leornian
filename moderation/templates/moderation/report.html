@@ -37,7 +37,9 @@
             <span>
                 <i class="bi-person"></i> <strong>Reporter</strong>:
                 {% if view.report.reporter %}
-                    {{ view.report.reporter.username }}
+                    <span title="{{ view.report.reporter.username }}">
+                        {{ view.report.reporter.username|truncatechars:20 }}
+                    </span>
                 {% else %}
                     <i class="text-secondary">unavailable</i>
                 {% endif %}

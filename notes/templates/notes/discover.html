@@ -26,8 +26,8 @@
         {% if note.author %}
             <p>
                 View more notes by
-                <a class="icon-link" href="{% url 'notes:notes-by-username' note.author.username %}">
-                    {{ note.author.username }}
+                <a class="icon-link" href="{% url 'notes:notes-by-username' note.author.username %}" title="{{ note.author.username }}">
+                    {{ note.author.username|truncatechars:20 }}
                 </a>
             </p>
         {% endif %}

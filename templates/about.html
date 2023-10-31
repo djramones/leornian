@@ -16,13 +16,14 @@
 {# TODO: complete this page stub #}
 <div class="text-center">
     {% if not user.is_authenticated %}
-        <a class="btn btn-primary" href="{% url 'leornian-register' %}">
-            <i class="bi-arrow-right-square"></i> Sign Up
-        </a>
-        &nbsp;
-        <a class="btn btn-primary" href="{% url 'notes:discover' %}">
-            <i class="bi-binoculars"></i> Browse Notes
-        </a>
+        <div class="d-flex justify-content-center gap-2 my-3">
+            <a class="btn btn-primary" href="{% url 'leornian-register' %}">
+                <i class="bi-arrow-right-square"></i> Sign Up
+            </a>
+            <a class="btn btn-primary" href="{% url 'notes:discover' %}">
+                <i class="bi-binoculars"></i> Browse Notes
+            </a>
+        </div>
         <p class="text-center text-secondary mt-3">
             (or <a class="icon-link link-secondary" href="{% url 'login' %}">log in</a>)
         </p>

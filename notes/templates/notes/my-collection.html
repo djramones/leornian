@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block title %}My Collection on Leornian{% endblock %}
 
@@ -42,7 +43,7 @@
 <div class="text-center">
     <small class="text-secondary">
         {% if paginator.count > 0 %}
-            <p>{{ paginator.count }} note{{ paginator.count|pluralize }}</p>
+            <p>{{ paginator.count|intcomma }} note{{ paginator.count|pluralize }}</p>
         {% endif %}
     </small>
 </div>
