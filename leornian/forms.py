@@ -26,7 +26,9 @@ class RegistrationForm(DjRegForm):
 
     class Meta(DjRegForm.Meta):
         # The default username-field help-text mentions the 150-char limit,
-        # which can be strange for users, so we override to simplify:
+        # which can be strange for users, so we override to simplify. This
+        # also drops mention of the `@` character, which we don't want to
+        # encourage.
         help_texts = {
             "username": (
                 "Can contain letters, digits, hyphens, underscores,"
