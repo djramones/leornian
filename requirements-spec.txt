@@ -8,6 +8,7 @@ markdown-it-py==3.0.0
 django-formtools==2.4.1
 django-registration==3.4
 requests==2.31.0
+gunicorn==21.2.0
 
 # Development requirements
 coverage==7.3.2
