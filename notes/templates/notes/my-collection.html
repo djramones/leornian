@@ -7,6 +7,7 @@
 <h1 class="text-center"><i class="bi-collection"></i> My Collection</h1>
 
 {% with namespace=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
+
 <nav class="mt-4 mb-3">
     <ul class="nav nav-pills justify-content-center">
         <li class="nav-item">
@@ -28,17 +29,18 @@
         </li>
     </ul>
 </nav>
+
 {% if namespace == 'notes' and url_name == 'not-in-collection-by-me' %}
     <div class="alert alert-info text-center">
         These notes are authored by you <strong><em>but are not saved in your collection</em></strong> (i.e., will not appear in <a href="{% url 'notes:drill' %}">Drill</a>, etc.).
     </div>
 {% endif %}
+
 {% if namespace == 'notes' and url_name == 'my-collection-promoted' %}
     <div class="alert alert-secondary text-center">
         These are the notes in your collection that are promoted in <a href="{% url 'notes:drill' %}">Drill</a>.
     </div>
 {% endif %}
-{% endwith %}
 
 <div class="text-center">
     <small class="text-secondary">
@@ -54,9 +56,16 @@
             {% include 'notes/includes/note_card.html' %}
         </div>
     {% empty %}
-        <div class="text-center my-3">No notes available.</div>
+        <div class="text-center my-3">
+            <p>No notes available.</p>
+            {% if namespace == 'notes' and url_name == 'my-collection' %}
+                <p><a href="{% url 'notes:discover' %}">Discover notes</a> or <a href="{% url 'notes:create-note' %}">write your own</a>.</p>
+            {% endif %}
+        </div>
     {% endfor %}
 </div>
+
+{% endwith %}
 
 {% include 'notes/includes/pagination.html' %}
 

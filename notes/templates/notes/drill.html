@@ -19,7 +19,7 @@
                         {% if disable_begin %}
                             <div class="alert alert-info text-center">
                                 Drill requires your collection to have at least two notes.
-                                <a href="{% url 'notes:discover' %}">Discover notes</a>
+                                <a href="{% url 'notes:discover' %}">Discover notes</a> or <a href="{% url 'notes:create-note' %}">write your own</a>.
                             </div>
                         {% else %}
                             <form method="post" action="{% url 'notes:drill' %}" class="d-inline-block">
