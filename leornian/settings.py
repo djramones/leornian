@@ -72,6 +72,13 @@ if DEBUG:
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
+# Security
+
+SECURE_SSL_REDIRECT = env.bool("LEOR_SECURE_SSL_REDIRECT")
+SESSION_COOKIE_SECURE = env.bool("LEOR_SESSION_COOKIE_SECURE")
+CSRF_COOKIE_SECURE = env.bool("LEOR_CSRF_COOKIE_SECURE")
+
+
 # Templates
 
 TEMPLATES = [
@@ -164,6 +171,7 @@ else:
     EMAIL_HOST_USER = env("LEOR_EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = env("LEOR_EMAIL_HOST_PASSWORD")
     EMAIL_USE_TLS = env.bool("LEOR_EMAIL_USE_TLS")
+
 
 # Terms of Service
 
