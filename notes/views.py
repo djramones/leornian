@@ -379,12 +379,15 @@ class Discover(View):
 
 class Drill(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        coll_count = Collection.objects.filter(user=request.user).count()
-        disable_begin = bool(coll_count < 2)
+        """Display the Drill start page"""
+
+        collection_size = Collection.objects.filter(user=request.user).count()
+        disable_begin = bool(collection_size < 2)
         recent_drill_count = Collection.objects.filter(
             user=request.user,
             last_drilled__gt=timezone.now() - timezone.timedelta(hours=24),
         ).count()
+
         return render(
             request,
             "notes/drill.html",
@@ -415,8 +418,14 @@ class Drill(LoginRequiredMixin, View):
         return weights
 
     def post(self, request, *args, **kwargs):
+        """Run a drill (do a 'draw'), and also process any pro-/demotion"""
+
+        # ---------------------------------------
+        # Perform promotion/demotion if requested
+        # ---------------------------------------
+
+        # Make sure to filter by user to prevent modifying other users' data!
         if promote_code := request.POST.get("promote"):
-            # Make sure to filter by user to prevent modifying other users' data
             updated = Collection.objects.filter(
                 note__code=promote_code, user=request.user
             ).update(promoted=True)
@@ -433,6 +442,10 @@ class Drill(LoginRequiredMixin, View):
                     request, messages.SUCCESS, "A note has been demoted."
                 )
 
+        # -----------------------
+        # Prepare inputs for draw
+        # -----------------------
+
         values = (
             Collection.objects.filter(user=request.user)
             .order_by("-last_drilled")
@@ -445,17 +458,31 @@ class Drill(LoginRequiredMixin, View):
                 request, "notes/drill.html", {"error": "insufficient-collection"}
             )
         # Last-drilled note should not be picked, hence `[1:]`:
-        coll_pks, note_pks = unzipped_values[0][1:], unzipped_values[1][1:]
+        coll_pks = unzipped_values[0][1:]
+        note_pks = unzipped_values[1][1:]
         promoted_vals = unzipped_values[2][1:]
+
+        # ----------------
+        # Perform the draw
+        # ----------------
+
         weights = self.generate_weights(promoted_vals)
         draw_index = random.choices(range(len(weights)), weights)[0]
-        note = Note.objects.select_related("author").get(pk=note_pks[draw_index])
-        promoted = Collection.objects.get(id=coll_pks[draw_index]).promoted
+
+        # ------------------------------------
+        # Update the drawn note's last_drilled
+        # ------------------------------------
 
         Collection.objects.filter(id=coll_pks[draw_index]).update(
             last_drilled=timezone.now()
         )
 
+        # ----------------------------------------
+        # Prepare context data, and finally render
+        # ----------------------------------------
+
+        note = Note.objects.select_related("author").get(pk=note_pks[draw_index])
+        promoted = Collection.objects.get(id=coll_pks[draw_index]).promoted
         recent_drill_count = Collection.objects.filter(
             user=request.user,
             last_drilled__gt=timezone.now() - timezone.timedelta(hours=24),
