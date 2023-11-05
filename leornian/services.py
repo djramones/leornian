@@ -3,8 +3,9 @@
 import csv
 import io
 import json
-from datetime import datetime
 from zipfile import ZIP_DEFLATED, ZipFile
+
+from django.utils import timezone
 
 from leornian_helpers.utils import get_object_url
 
@@ -58,7 +59,7 @@ def export_user_data(request) -> io.BytesIO:
         f"Number of notes in collection: {len(notes_data)}\n\n"
         "The CSV file in this archive is encoded in UTF-8 with BOM for"
         " compatibility with Microsoft applications (especially Excel).\n\n"
-        f"This archive was generated at {datetime.now().isoformat()} (UTC).\n"
+        f"This archive was generated at {timezone.now().isoformat()}.\n"
     )
 
     # Save into compressed archive in memory

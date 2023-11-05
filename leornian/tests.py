@@ -2,7 +2,6 @@ import csv
 import io
 import json
 import zipfile
-from datetime import datetime
 from unittest.mock import patch
 
 from django.contrib.auth import get_user, get_user_model
@@ -13,6 +12,7 @@ from django.core.handlers.wsgi import WSGIHandler
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import resolve, reverse
+from django.utils import timezone
 
 from notes.models import Note
 
@@ -400,7 +400,7 @@ class DownloadAccountDataViewTests(DownloadAccountDataTestsBase):
         mock_verify_captcha.side_effect = lambda *args: args[1]
         self.client.login(username="empty", password="...")
         res = self.client.post(reverse("download-account-data"))
-        file_date = datetime.now().isoformat()[:10]
+        file_date = timezone.now().isoformat()[:10]
         self.assertIn(
             f"leornian-data-empty-{file_date}.zip", res.headers["Content-Disposition"]
         )

@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from django.core import mail
 from django.core.exceptions import BadRequest
 from django.test import RequestFactory, TestCase
@@ -22,7 +24,8 @@ class ReportModelTests(TestCase):
 class GenerateDateBasedReferenceCodeTests(TestCase):
     def test_generate(self):
         code = generate_date_based_reference_code()
-        self.assertRegex(code[:8], "[0-9]{8}")
+        utc_date = datetime.now(timezone.utc).isoformat()[:10]
+        self.assertRegex(code[:8], utc_date.replace("-", ""))
         self.assertEqual(code[8], "-")
         self.assertRegex(code[9:], "[0-9A-Z]{8}")
         self.assertEqual(len(code), 17)

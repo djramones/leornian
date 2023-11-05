@@ -1,11 +1,10 @@
-from datetime import datetime
-
 from django import forms, template
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import FileResponse, HttpResponseRedirect
 from django.utils import safestring
+from django.utils import timezone
 from django.utils.text import slugify
 from django.views.generic import FormView, TemplateView
 from django_registration.backends.activation.views import RegistrationView as DjRegView
@@ -53,7 +52,7 @@ class DownloadAccountData(LoginRequiredMixin, CaptchaFormMixin, FormView):
         data = export_user_data(self.request)
         file_user = self.request.user.username[:20]  # in case it's too long
         file_user = slugify(file_user)  # to be filename-safe
-        file_date = datetime.now().isoformat()[:10]
+        file_date = timezone.now().isoformat()[:10]
         filename = f"leornian-data-{file_user}-{file_date}.zip"
         return FileResponse(data, as_attachment=True, filename=filename)
 
