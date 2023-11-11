@@ -1,0 +1,4 @@
+# See: https://tech.reversedelay.net/2023/07/a-lightweight-python-pip-workflow
+# For systems that look specifically for `requirements.txt`, we refer to the
+# lock file:
+-r requirements-lock.txt
