@@ -5,13 +5,18 @@
     <div class="card my-3">
         <div class="card-body">
             <ul class="my-0">
-                <li>Please be mindful of the <a href="{% url 'content-license' %}">license terms</a> that apply to your submitted content.</li>
+                {% with length=form.fields.text.max_length %}
+                    {% if length %}
+                        <li>Notes are limited to {{ length }} characters.</li>
+                    {% endif %}
+                {% endwith %}
                 <li>You can format your note using a limited set of <a class="icon-link" href="https://commonmark.org/help/">Markdown <i class="bi-box-arrow-up-right"></i></a> syntaxes. Specifically, the following are enabled: emphasis (<em>italic</em> &amp; <strong>bold</strong>, using asterisks or underscores), <s>strikethrough</s> (with tildes), <code>inline code</code> (with backticks), HTML entities, backslash escapes, and ordered &amp; unordered lists.</li>
                 <li>Use the preview function to check if your note is formatted as intended, before submitting.</li>
                 <li>You cannot edit a note once it has been submitted.</li>
                 <li>You can delete a submitted note unless another user has saved it to their collection; however, you can remove attribution from your account at any time (i.e., the note will become anonymous and disassociated from your account).</li>
                 <li>Setting your note’s visibility setting to “Unlisted” makes it less visible to other users, for example by not appearing in <a href="{% url 'notes:discover' %}">Discover</a> nor in your <a href="{% url 'notes:notes-by-username' user.username %}">author page</a>, <strong>but it does not make your note private</strong> (anyone with the note’s link will still be able to access it).</li>
-                <li>You can change your note’s visibility at any time after submission (unless a moderator locks the note’s visibility setting because of content issues).</li>
+                <li>You can change your note’s visibility at any time after submission (unless a content moderator locks the note’s visibility setting).</li>
+                <li>Please be mindful of the <a href="{% url 'content-license' %}">license terms</a> that apply to your submitted content.</li>
             </ul>
         </div>
     </div>
