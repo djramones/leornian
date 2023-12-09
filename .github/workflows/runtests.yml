@@ -1,0 +1,49 @@
+name: Run tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: leornian
+          POSTGRES_PASSWORD: dbpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Ubuntu packages
+      # Note: these are already installed in GitHub's Ubuntu runner image:
+      run: sudo apt install build-essential libpq-dev python3-dev python3-venv
+    - name: Cache Python environment
+      uses: actions/cache@v3
+      id: cache-venv
+      with:
+        path: venv/
+        key: ${{ runner.os }}-venv-${{ hashFiles('requirements-lock.txt') }}
+        restore-keys: ${{ runner.os }}-venv-
+    - name: Set up Python environment
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+      run: |
+        python3 -m venv venv
+        source venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r requirements-lock.txt
+    - name: Create environment file
+      run: cp .env.dist .env
+    - name: Run tests
+      env:
+        # Override a setting from `.env.dist` that will cause test failures:
+        LEOR_SECURE_SSL_REDIRECT: False
+      run: |
+        source venv/bin/activate
+        python manage.py test --parallel=2
