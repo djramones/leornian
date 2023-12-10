@@ -22,7 +22,6 @@ jobs:
         with:
           path: venv/
           key: ${{ runner.os }}-venv-${{ hashFiles('requirements-lock.txt') }}
-          restore-keys: ${{ runner.os }}-venv-
       - name: Set up Python environment
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
