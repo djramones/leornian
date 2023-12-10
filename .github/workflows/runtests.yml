@@ -35,6 +35,4 @@ jobs:
         env:
           # Override a setting from `.env.dist` that will cause test failures:
           LEOR_SECURE_SSL_REDIRECT: False
-        run: |
-          source venv/bin/activate
-          python manage.py test --parallel=2
+        run: venv/bin/python manage.py test --parallel=2
