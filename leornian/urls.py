@@ -1,18 +1,29 @@
 """URL configuration for leornian project."""
 
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
-from django.urls import path, include
+from django.urls import include, path
 from django.views.generic import TemplateView
+from rest_framework import routers
 
-from django.conf import settings
+from notes.api import router as notes_router
 
 from . import views as site_views
 
 
 admin.site.site_header = admin.site.site_title = "Leornian admin"
 
+# API router
+router = routers.DefaultRouter()
+router.APIRootView.name = "API Root"
+router.APIRootView.description = "The Leornian API root resource."
+router.registry.extend(notes_router.registry)
+
+
 urlpatterns = [
+    path("api/accounts/", include("rest_framework.urls")),
+    path("api/", include(router.urls)),
     path("admin/", admin.site.urls),
     path(
         # django-registration override

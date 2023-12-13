@@ -51,6 +51,14 @@ class BasicTests(TestCase):
         response = self.client.get("/content-license/")
         self.assertEqual(response.status_code, 200)
 
+        # API: root
+        response = self.client.get("/api/", headers={"accept": "text/html"})
+        self.assertEqual(response.status_code, 403)
+
+        # API: login page
+        response = self.client.get("/api/accounts/login/")
+        self.assertEqual(response.status_code, 200)
+
         # Admin views
         response = self.client.get("/admin/")
         self.assertRedirects(response, "/admin/login/?next=/admin/")
@@ -60,6 +68,7 @@ class BasicTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Auth: perform login
+        # NOTE: should be last in test as this changes authentication status!
         response = self.client.post(
             "/accounts/login/", {"username": "mary", "password": "1234"}
         )

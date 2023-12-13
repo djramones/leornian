@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "formtools",
+    "rest_framework",
     "django_registration",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -70,6 +71,16 @@ if DEBUG:
 # Models
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# API
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}
 
 
 # Security
