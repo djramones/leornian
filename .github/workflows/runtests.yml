@@ -17,7 +17,7 @@ jobs:
           sudo su - postgres -c "psql -c \"CREATE USER leornian WITH PASSWORD 'dbpassword';\""
           sudo su - postgres -c "psql -c \"ALTER ROLE leornian SUPERUSER;\""
       - name: Cache Python environment
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-venv
         with:
           path: venv/
