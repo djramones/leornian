@@ -25,7 +25,7 @@ class NoteQuerySet(models.QuerySet):
         else:
             qs = self
 
-        qs = qs.exclude(visibility=Note.Visibility.UNLISTED)
+        qs = qs.exclude(visibility=Note.Visibility.UNLISTED).select_related("author")
 
         # `order_by("?")` can be slow at scale. See:
         # tech.reversedelay.net/2023/09/optimizing-sql-random-row-select/
